@@ -106,6 +106,27 @@
             opacity: 0.6;
         }
 
+        .btn-secondary {
+            width: 100%;
+            padding: 14px;
+            background: #3b82f6;
+            color: white;
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-secondary:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
         .btn-danger {
             width: 100%;
             padding: 12px;
@@ -152,6 +173,19 @@
             margin-top: 16px;
             padding-top: 16px;
             border-top: 2px solid #e5e7eb;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .button-group button {
+            flex: 1;
+            margin: 0;
+            font-size: 15px;
         }
 
         .camera-container {
@@ -222,6 +256,48 @@
             flex-direction: column;
             gap: 8px;
             margin-top: 12px;
+        }
+
+        .barcode-input-container {
+            margin-bottom: 20px;
+            padding: 16px;
+            background: #f0f9ff;
+            border: 2px dashed #3b82f6;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .barcode-input-container.show {
+            display: block;
+        }
+
+        .barcode-input-container label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #1e40af;
+            font-size: 13px;
+        }
+
+        .barcode-input-container input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #3b82f6;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .barcode-input-container input::placeholder {
+            color: #93c5fd;
+        }
+
+        .barcode-input-hint {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #0369a1;
+            font-weight: 500;
         }
 
         .feedback {
@@ -539,6 +615,12 @@
             transform: translateY(-2px);
             box-shadow: 0 8px 16px rgba(16, 185, 129, 0.3);
         }
+
+        .input-hidden {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
@@ -565,14 +647,47 @@
             >
         </div>
 
-        <!-- Botão Escanear -->
-        <button id="btnEscanear" class="btn-primary" disabled>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-                <circle cx="12" cy="13" r="4"></circle>
-            </svg>
-            Escanear Código de Barras
-        </button>
+        <!-- Botões de Escanear -->
+        <div class="button-group">
+            <button id="btnEscanear" class="btn-primary" disabled>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                    <circle cx="12" cy="13" r="4"></circle>
+                </svg>
+                Câmera
+            </button>
+            <button id="btnLeitorCodigo" class="btn-secondary" disabled>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <rect x="5" y="5" width="14" height="14" rx="2"></rect>
+                </svg>
+                Leitor
+            </button>
+        </div>
+
+        <!-- Container para Entrada de Código de Barras -->
+        <div id="barcodeInputContainer" class="barcode-input-container">
+            <label for="barcodeInput">📱 Aproxime o leitor de código de barras:</label>
+            <input 
+                type="text" 
+                id="barcodeInput" 
+                placeholder="Leitura automática..."
+                autocomplete="off"
+                class="input-hidden"
+            >
+            <div style="position: relative;">
+                <input 
+                    type="text" 
+                    id="barcodeDisplay" 
+                    placeholder="Código será exibido aqui..."
+                    readonly
+                    style="margin-bottom: 8px;"
+                >
+            </div>
+            <div class="barcode-input-hint">💡 O leitor irá digitar o código automaticamente. Pressione Enter ou aguarde.</div>
+            <button id="btnFecharLeitor" class="btn-danger" style="margin-top: 12px;">Fechar Leitor</button>
+        </div>
 
         <!-- Área da Câmera -->
         <div id="cameraContainer" class="camera-container" style="display: none;">
@@ -677,16 +792,23 @@
         let timeoutUltimoCodigo = null;
         let pdfExportado = false;
         let codigoPendente = null;
+        let modoLeitor = false;
+        let timeoutBarcodeInput = null;
 
         // Elementos do DOM
         const inputNomeColaborador = document.getElementById('nomeColaborador');
         const inputNomeLoja = document.getElementById('nomeLoja');
         const btnEscanear = document.getElementById('btnEscanear');
+        const btnLeitorCodigo = document.getElementById('btnLeitorCodigo');
         const btnFechar = document.getElementById('btnFechar');
+        const btnFecharLeitor = document.getElementById('btnFecharLeitor');
         const btnExportarJSON = document.getElementById('btnExportarJSON');
         const btnExportar = document.getElementById('btnExportar');
         const btnLimpar = document.getElementById('btnLimpar');
         const cameraContainer = document.getElementById('cameraContainer');
+        const barcodeInputContainer = document.getElementById('barcodeInputContainer');
+        const barcodeInput = document.getElementById('barcodeInput');
+        const barcodeDisplay = document.getElementById('barcodeDisplay');
         const video = document.getElementById('video');
         const feedback = document.getElementById('feedback');
         const listaNotas = document.getElementById('listaNotas');
@@ -708,13 +830,31 @@
         inputNomeLoja.addEventListener('input', validarCampos);
 
         btnEscanear.addEventListener('click', iniciarCamera);
+        btnLeitorCodigo.addEventListener('click', iniciarLeitorCodigo);
         btnFechar.addEventListener('click', pararCamera);
+        btnFecharLeitor.addEventListener('click', pararLeitorCodigo);
         btnExportarJSON.addEventListener('click', exportarJSON);
         btnExportar.addEventListener('click', exportarPDF);
         btnLimpar.addEventListener('click', limparNotas);
 
         btnModalCancelar.addEventListener('click', fecharModal);
         btnModalConfirmar.addEventListener('click', confirmarNota);
+
+        // Event listener para entrada de código de barras
+        barcodeInput.addEventListener('input', function(e) {
+            barcodeDisplay.value = e.target.value;
+        });
+
+        barcodeInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                processarCodigoLeitor(barcodeInput.value);
+            }
+        });
+
+        barcodeInput.addEventListener('change', function() {
+            // Alguns leitores disparam 'change' em vez de 'keypress'
+            processarCodigoLeitor(barcodeInput.value);
+        });
 
         // Fechar modal ao clicar fora
         modalOverlay.addEventListener('click', function(e) {
@@ -723,10 +863,14 @@
             }
         });
 
+        // Carregar dados ao iniciar
+        carregarDoLocalStorage();
+
         function validarCampos() {
             const colaboradorPreenchido = inputNomeColaborador.value.trim();
             const lojaPreenchida = inputNomeLoja.value.trim();
             btnEscanear.disabled = !(colaboradorPreenchido && lojaPreenchida);
+            btnLeitorCodigo.disabled = !(colaboradorPreenchido && lojaPreenchida);
         }
 
         function extrairNumeroNF(codigoBarras) {
@@ -810,11 +954,13 @@
             codigoPendente = null;
             
             // Retomar detecção
-            if (stream) {
+            if (stream && !modoLeitor) {
                 scannerAtivo = true;
                 statusText.textContent = '🔍 Procurando código...';
                 statusText.className = 'status-badge status-searching';
                 detectarCodigos();
+            } else if (modoLeitor) {
+                barcodeInput.focus();
             }
         }
 
@@ -848,7 +994,10 @@
 
                 video.srcObject = stream;
                 cameraContainer.style.display = 'block';
+                barcodeInputContainer.classList.remove('show');
+                modoLeitor = false;
                 btnEscanear.style.display = 'none';
+                btnLeitorCodigo.style.display = 'none';
                 scannerAtivo = true;
 
                 await video.play();
@@ -876,6 +1025,44 @@
             video.srcObject = null;
             cameraContainer.style.display = 'none';
             btnEscanear.style.display = 'flex';
+            btnLeitorCodigo.style.display = 'flex';
+        }
+
+        function iniciarLeitorCodigo() {
+            modoLeitor = true;
+            barcodeInputContainer.classList.add('show');
+            cameraContainer.style.display = 'none';
+            btnEscanear.style.display = 'none';
+            btnLeitorCodigo.style.display = 'none';
+            
+            // Limpar campos anteriores
+            barcodeInput.value = '';
+            barcodeDisplay.value = '';
+            
+            // Focar no input (invisível) para receber dados do leitor
+            barcodeInput.focus();
+        }
+
+        function pararLeitorCodigo() {
+            modoLeitor = false;
+            barcodeInputContainer.classList.remove('show');
+            barcodeInput.value = '';
+            barcodeDisplay.value = '';
+            btnEscanear.style.display = 'flex';
+            btnLeitorCodigo.style.display = 'flex';
+            
+            clearTimeout(timeoutBarcodeInput);
+        }
+
+        function processarCodigoLeitor(codigo) {
+            if (!codigo || codigo.trim() === '') return;
+
+            // Limpar o input para próxima leitura
+            barcodeInput.value = '';
+            barcodeDisplay.value = '';
+            barcodeInput.focus();
+
+            mostrarModalConfirmacao(codigo.trim());
         }
 
         function processarCodigo(codigoBarras, temFoto = false) {
@@ -894,7 +1081,9 @@
 
             if (jaExiste) {
                 mostrarFeedback('⚠️ Esta nota já foi escaneada!', '#f59e0b');
-                setTimeout(() => pararCamera(), 1000);
+                if (!modoLeitor) {
+                    setTimeout(() => pararCamera(), 1000);
+                }
                 return;
             }
 
@@ -922,7 +1111,56 @@
             pdfExportado = false;
             btnLimpar.disabled = true;
 
-            setTimeout(() => pararCamera(), 1500);
+            if (!modoLeitor) {
+                setTimeout(() => pararCamera(), 1500);
+            }
+        }
+
+        function atualizarLista() {
+            if (notasFiscais.length === 0) {
+                listaNotas.innerHTML = '<p class="empty-state">Nenhuma nota fiscal escaneada ainda</p>';
+                actionButtons.style.display = 'none';
+                contador.textContent = '0';
+                return;
+            }
+
+            actionButtons.style.display = 'flex';
+            contador.textContent = notasFiscais.length;
+
+            listaNotas.innerHTML = notasFiscais.map(nota => `
+                <div class="nota-card">
+                    <div class="nota-colaborador">${nota.colaborador}</div>
+                    <div class="nota-loja">${nota.loja}</div>
+                    <div class="nota-numero">${nota.numeroNF}</div>
+                    <div class="nota-data">${nota.dataHora}${nota.temFoto ? ' <span class="photo-icon">📸</span>' : ''}</div>
+                </div>
+            `).join('');
+        }
+
+        function mostrarFeedback(mensagem, cor) {
+            feedback.textContent = mensagem;
+            feedback.style.background = cor;
+            feedback.style.display = 'block';
+            
+            setTimeout(() => {
+                feedback.style.display = 'none';
+            }, 3000);
+        }
+
+        function salvarNoLocalStorage() {
+            localStorage.setItem('notasFiscais', JSON.stringify(notasFiscais));
+        }
+
+        function carregarDoLocalStorage() {
+            const dados = localStorage.getItem('notasFiscais');
+            if (dados) {
+                try {
+                    notasFiscais = JSON.parse(dados);
+                    atualizarLista();
+                } catch (error) {
+                    console.error('Erro ao carregar dados:', error);
+                }
+            }
         }
 
         function exportarJSON() {
@@ -998,131 +1236,52 @@
                     y += 10;
 
                     doc.setFontSize(10);
+                    doc.setTextColor(107, 114, 128);
+
                     notas.forEach((nota, index) => {
-                        if (y > pageHeight - 30) {
+                        if (y > pageHeight - 40) {
                             doc.addPage();
                             y = 20;
-                            
-                            doc.setFontSize(14);
-                            doc.setTextColor(31, 41, 55);
-                            doc.text(`Loja: ${loja} (continuação)`, 20, y);
-                            y += 15;
                         }
 
-                        if (index % 2 === 0) {
-                            doc.setFillColor(249, 250, 251);
-                            doc.rect(15, y - 5, pageWidth - 30, 20, 'F');
-                        }
-
-                        doc.setTextColor(118, 75, 162);
-                        doc.text(`Colaborador: ${nota.colaborador}`, 20, y);
+                        const fotoIcon = nota.temFoto ? ' 📸' : '';
+                        doc.text(`${index + 1}. NF: ${nota.numeroNF}${fotoIcon}`, 20, y);
                         y += 5;
-
-                        doc.setTextColor(75, 85, 99);
-                        const nfText = nota.temFoto ? `NF: ${nota.numeroNF} 📸` : `NF: ${nota.numeroNF}`;
-                        doc.text(nfText, 20, y);
-                        y += 5;
-
-                        doc.setTextColor(107, 114, 128);
                         doc.setFontSize(9);
-                        doc.text(`Data: ${nota.dataHora}`, 20, y);
+                        doc.setTextColor(155, 160, 168);
+                        doc.text(`Colaborador: ${nota.colaborador}`, 25, y);
+                        y += 4;
+                        doc.text(`Data: ${nota.dataHora}`, 25, y);
+                        y += 8;
                         doc.setFontSize(10);
-                        y += 10;
+                        doc.setTextColor(107, 114, 128);
                     });
                 });
 
                 const dataAtual = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
-                const nomeArquivo = `relatorio_notas_${dataAtual}.pdf`;
-                doc.save(nomeArquivo);
-
+                doc.save(`relatorio_notas_${dataAtual}.pdf`);
                 mostrarFeedback('✓ PDF exportado com sucesso!', '#10b981');
-                
-                pdfExportado = true;
-                btnLimpar.disabled = false;
-
             } catch (error) {
-                console.error('Erro ao gerar PDF:', error);
-                mostrarFeedback('❌ Erro ao gerar PDF', '#ef4444');
+                console.error('Erro ao exportar PDF:', error);
+                mostrarFeedback('❌ Erro ao exportar PDF', '#ef4444');
             }
         }
 
         function limparNotas() {
-            if (!pdfExportado) {
-                mostrarFeedback('⚠️ Exporte o PDF antes de limpar!', '#f59e0b');
+            if (notasFiscais.length === 0) {
+                mostrarFeedback('❌ Nenhuma nota para limpar', '#ef4444');
                 return;
             }
 
-            if (confirm('⚠️ Tem certeza que deseja limpar todas as notas?\n\nEsta ação não pode ser desfeita!')) {
+            if (confirm('⚠️ Tem certeza que deseja limpar todas as notas fiscais?')) {
                 notasFiscais = [];
                 atualizarLista();
                 salvarNoLocalStorage();
-                pdfExportado = false;
+                mostrarFeedback('✓ Todas as notas foram removidas', '#10b981');
                 btnLimpar.disabled = true;
-                mostrarFeedback('✓ Todas as notas foram removidas!', '#10b981');
+                pdfExportado = false;
             }
         }
-
-        function mostrarFeedback(mensagem, cor) {
-            feedback.textContent = mensagem;
-            feedback.style.backgroundColor = cor;
-            feedback.style.display = 'block';
-
-            setTimeout(() => {
-                feedback.style.display = 'none';
-            }, 3000);
-        }
-
-        function atualizarLista() {
-            contador.textContent = notasFiscais.length;
-
-            if (notasFiscais.length === 0) {
-                listaNotas.innerHTML = '<p class="empty-state">Nenhuma nota fiscal escaneada ainda</p>';
-                actionButtons.style.display = 'none';
-                return;
-            }
-
-            actionButtons.style.display = 'flex';
-
-            listaNotas.innerHTML = notasFiscais.map(nota => `
-                <div class="nota-card">
-                    <div class="nota-colaborador">${nota.colaborador}</div>
-                    <div class="nota-loja">${nota.loja}</div>
-                    <div class="nota-numero">
-                        NF: ${nota.numeroNF}${nota.temFoto ? '<span class="photo-icon">📸</span>' : ''}
-                    </div>
-                    <div class="nota-data">${nota.dataHora}</div>
-                </div>
-            `).join('');
-        }
-
-        function salvarNoLocalStorage() {
-            localStorage.setItem('notasFiscais', JSON.stringify(notasFiscais));
-        }
-
-        function carregarDoLocalStorage() {
-            const dados = localStorage.getItem('notasFiscais');
-            if (dados) {
-                notasFiscais = JSON.parse(dados);
-                atualizarLista();
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            carregarDoLocalStorage();
-            console.log('Scanner DANFE iniciado!');
-            
-            if ('BarcodeDetector' in window) {
-                console.log('✓ BarcodeDetector suportado!');
-            } else {
-                console.warn('✗ BarcodeDetector não suportado');
-            }
-        });
-
-        window.addEventListener('beforeunload', function() {
-            if (scannerAtivo) {
-                pararCamera();
-            }
-        });
     </script>
 </body>
 </html>

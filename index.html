@@ -1260,6 +1260,11 @@
 
                 const dataAtual = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
                 doc.save(`relatorio_notas_${dataAtual}.pdf`);
+                
+                // Habilitar botão de limpar após exportar PDF
+                pdfExportado = true;
+                btnLimpar.disabled = false;
+                
                 mostrarFeedback('✓ PDF exportado com sucesso!', '#10b981');
             } catch (error) {
                 console.error('Erro ao exportar PDF:', error);
@@ -1279,7 +1284,7 @@
                 salvarNoLocalStorage();
                 mostrarFeedback('✓ Todas as notas foram removidas', '#10b981');
                 btnLimpar.disabled = true;
-                pdfExportado = true;
+                pdfExportado = false;
             }
         }
     </script>

@@ -11,11 +11,22 @@
             box-sizing: border-box;
         }
 
+        html {
+            overflow-y: scroll;
+            overflow-x: hidden;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
+            overflow-x: hidden;
+        }
+
+        body.modal-open {
+            overflow: hidden;
+            padding-right: 0;
         }
 
         .container {
@@ -474,6 +485,8 @@
             justify-content: center;
             z-index: 1000;
             animation: fadeInModal 0.2s ease;
+            overflow-y: auto;
+            padding: 20px;
         }
 
         .modal-overlay.show {
@@ -794,6 +807,29 @@
         let codigoPendente = null;
         let modoLeitor = false;
         let timeoutBarcodeInput = null;
+        
+        // Função para tocar beep
+        function tocarBeep() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = 800; // Frequência do beep
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.2);
+            } catch (error) {
+                console.log('Erro ao tocar beep:', error);
+            }
+        }
 
         // Elementos do DOM
         const inputNomeColaborador = document.getElementById('nomeColaborador');
@@ -939,11 +975,17 @@
             // Pausar detecção
             scannerAtivo = false;
             
+            // Tocar beep quando detectar código válido
+            tocarBeep();
+            
             // Preencher modal
             modalColaborador.textContent = inputNomeColaborador.value.trim();
             modalLoja.textContent = inputNomeLoja.value.trim();
             modalNumeroNF.textContent = numeroNF;
             checkboxFoto.checked = false;
+            
+            // Prevenir scroll do body
+            document.body.classList.add('modal-open');
             
             // Mostrar modal
             modalOverlay.classList.add('show');
@@ -951,6 +993,7 @@
 
         function fecharModal() {
             modalOverlay.classList.remove('show');
+            document.body.classList.remove('modal-open');
             codigoPendente = null;
             
             // Retomar detecção
@@ -971,7 +1014,22 @@
             processarCodigo(codigoPendente, temFoto);
             
             modalOverlay.classList.remove('show');
+            document.body.classList.remove('modal-open');
             codigoPendente = null;
+            
+            // Retomar leitura imediatamente
+            if (stream && !modoLeitor) {
+                // Modo câmera - retomar detecção
+                scannerAtivo = true;
+                statusText.textContent = '🔍 Procurando código...';
+                statusText.className = 'status-badge status-searching';
+                detectarCodigos();
+            } else if (modoLeitor) {
+                // Modo leitor - focar no input para próxima leitura
+                barcodeInput.value = '';
+                barcodeDisplay.value = '';
+                barcodeInput.focus();
+            }
         }
 
         async function iniciarCamera() {
@@ -1081,9 +1139,7 @@
 
             if (jaExiste) {
                 mostrarFeedback('⚠️ Esta nota já foi escaneada!', '#f59e0b');
-                if (!modoLeitor) {
-                    setTimeout(() => pararCamera(), 1000);
-                }
+                // Não fechar - continuar escaneando
                 return;
             }
 
@@ -1111,9 +1167,7 @@
             pdfExportado = false;
             btnLimpar.disabled = true;
 
-            if (!modoLeitor) {
-                setTimeout(() => pararCamera(), 1500);
-            }
+            // Removido o fechamento automático - continua escaneando
         }
 
         function atualizarLista() {

@@ -257,68 +257,117 @@
             font-weight: 600;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
             padding: 8px;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.3);
             border-radius: 8px;
-            margin: 0 10px;
         }
 
-        .camera-buttons {
+        .notas-section {
+            margin-top: 32px;
+        }
+
+        .section-header {
             display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-top: 12px;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
         }
 
-        .barcode-input-container {
-            margin-bottom: 20px;
-            padding: 16px;
-            background: #f0f9ff;
-            border: 2px dashed #3b82f6;
+        .contador {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .lista-notas {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+
+        .lista-notas::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .lista-notas::-webkit-scrollbar-track {
+            background: #f3f4f6;
+            border-radius: 4px;
+        }
+
+        .lista-notas::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 4px;
+        }
+
+        .lista-notas::-webkit-scrollbar-thumb:hover {
+            background: #764ba2;
+        }
+
+        .nota-card {
+            background: #f9fafb;
+            border: 2px solid #e5e7eb;
             border-radius: 10px;
-            display: none;
-        }
-
-        .barcode-input-container.show {
-            display: block;
-        }
-
-        .barcode-input-container label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #1e40af;
-            font-size: 13px;
-        }
-
-        .barcode-input-container input {
-            width: 100%;
             padding: 12px;
-            border: 2px solid #3b82f6;
-            border-radius: 8px;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .nota-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
+        }
+
+        .nota-colaborador {
+            font-weight: 700;
+            color: #1f2937;
             font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .nota-loja {
+            color: #667eea;
             font-weight: 600;
-            letter-spacing: 1px;
+            font-size: 14px;
+            margin-bottom: 6px;
         }
 
-        .barcode-input-container input::placeholder {
-            color: #93c5fd;
-        }
-
-        .barcode-input-hint {
-            margin-top: 8px;
-            font-size: 12px;
-            color: #0369a1;
+        .nota-numero {
+            color: #4b5563;
+            font-size: 14px;
             font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .nota-data {
+            color: #9ca3af;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .photo-icon {
+            font-size: 14px;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #9ca3af;
+            padding: 40px 20px;
+            font-style: italic;
         }
 
         .feedback {
-            padding: 14px;
-            background: #10b981;
-            color: white;
+            display: none;
+            padding: 16px;
             border-radius: 10px;
-            margin-bottom: 20px;
-            text-align: center;
+            margin-bottom: 16px;
+            color: white;
             font-weight: 600;
+            text-align: center;
             animation: slideDown 0.3s ease;
         }
 
@@ -333,185 +382,39 @@
             }
         }
 
-        .status-badge {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-bottom: 12px;
-        }
-
-        .status-searching {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .status-detected {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .notas-section {
-            margin-top: 24px;
-        }
-
-        .lista-notas {
-            max-height: 400px;
-            overflow-y: auto;
-            padding-right: 4px;
-        }
-
-        .lista-notas::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .lista-notas::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-
-        .lista-notas::-webkit-scrollbar-thumb {
-            background: #667eea;
-            border-radius: 10px;
-        }
-
-        .empty-state {
-            text-align: center;
-            color: #9ca3af;
-            padding: 32px 20px;
-            font-size: 14px;
-        }
-
-        .nota-card {
-            padding: 16px;
-            background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
-            border-radius: 10px;
-            margin-bottom: 10px;
-            border-left: 4px solid #667eea;
-            animation: fadeIn 0.3s ease;
-            transition: all 0.3s ease;
-        }
-
-        .nota-card:hover {
-            transform: translateX(4px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .nota-colaborador {
-            font-weight: 600;
-            margin-bottom: 6px;
-            color: #764ba2;
-            font-size: 15px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .nota-colaborador::before {
-            content: "👤";
-            font-size: 14px;
-        }
-
-        .nota-loja {
-            font-weight: 600;
-            margin-bottom: 6px;
-            color: #1f2937;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .nota-loja::before {
-            content: "🏪";
-            font-size: 14px;
-        }
-
-        .nota-numero {
-            font-weight: 500;
-            color: #4b5563;
-            margin-bottom: 6px;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .nota-numero::before {
-            content: "📄";
-            font-size: 12px;
-        }
-
-        .nota-data {
-            font-size: 13px;
-            color: #6b7280;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .nota-data::before {
-            content: "🕒";
-            font-size: 12px;
-        }
-
-        .photo-icon {
-            margin-left: 6px;
-            font-size: 14px;
-        }
-
-        /* Modal de Confirmação */
-        .modal-overlay {
+        .modal-confirmacao {
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
             background: rgba(0, 0, 0, 0.7);
-            display: none;
+            z-index: 1000;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
-            animation: fadeInModal 0.2s ease;
-            overflow-y: auto;
             padding: 20px;
+            backdrop-filter: blur(4px);
         }
 
-        .modal-overlay.show {
+        .modal-confirmacao.show {
             display: flex;
         }
 
-        @keyframes fadeInModal {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .modal {
+        .modal-content {
             background: white;
             border-radius: 16px;
-            padding: 24px;
-            max-width: 90%;
-            width: 380px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            animation: slideUp 0.3s ease;
+            padding: 28px;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            animation: modalSlideUp 0.3s ease;
         }
 
-        @keyframes slideUp {
+        @keyframes modalSlideUp {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(30px);
             }
             to {
                 opacity: 1;
@@ -519,10 +422,11 @@
             }
         }
 
-        .modal h3 {
+        .modal-header {
+            font-size: 22px;
+            font-weight: 700;
             color: #1f2937;
-            font-size: 20px;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
             text-align: center;
         }
 
@@ -530,7 +434,7 @@
             background: #f3f4f6;
             padding: 16px;
             border-radius: 10px;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
         }
 
         .modal-info-item {
@@ -551,528 +455,327 @@
 
         .modal-info-value {
             color: #1f2937;
-            font-weight: 600;
-        }
-
-        .modal-nf {
-            font-size: 28px;
-            color: #667eea;
-            text-align: center;
             font-weight: 700;
-            margin: 16px 0;
-            padding: 16px;
-            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-            border-radius: 12px;
-            letter-spacing: 2px;
         }
 
-        .checkbox-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 14px;
+        .modal-barcode {
             background: #fef3c7;
-            border: 2px solid #fbbf24;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .checkbox-container:hover {
-            background: #fde68a;
-            border-color: #f59e0b;
-        }
-
-        .checkbox-container input[type="checkbox"] {
-            width: 22px;
-            height: 22px;
-            cursor: pointer;
-            accent-color: #667eea;
-        }
-
-        .checkbox-label {
+            border: 2px dashed #f59e0b;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
             color: #92400e;
-            font-weight: 600;
-            font-size: 14px;
-            flex: 1;
-            cursor: pointer;
+            word-break: break-all;
+            margin-bottom: 20px;
         }
 
-        .modal-buttons {
+        .modal-actions {
             display: flex;
-            gap: 10px;
+            gap: 12px;
         }
 
-        .btn-modal-cancel {
+        .modal-actions button {
             flex: 1;
             padding: 14px;
-            background: #e5e7eb;
-            color: #374151;
-            font-size: 15px;
+            font-size: 16px;
         }
 
-        .btn-modal-cancel:hover {
-            background: #d1d5db;
+        .barcode-input-container {
+            display: none;
+            margin-bottom: 20px;
         }
 
-        .btn-modal-confirm {
-            flex: 1;
+        .barcode-input-container.show {
+            display: block;
+        }
+
+        .barcode-display {
+            width: 100%;
             padding: 14px;
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-            font-size: 15px;
+            border: 3px solid #10b981;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            text-align: center;
+            background: #f0fdf4;
+            color: #065f46;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 12px;
         }
 
-        .btn-modal-confirm:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(16, 185, 129, 0.3);
+        .barcode-hint {
+            text-align: center;
+            color: #059669;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 12px;
+            background: #d1fae5;
+            border-radius: 8px;
+            animation: pulse 2s infinite;
         }
 
-        .input-hidden {
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        .hidden-barcode-input {
             position: absolute;
-            opacity: 0;
-            pointer-events: none;
+            left: -9999px;
+            width: 1px;
+            height: 1px;
+        }
+
+        .enter-hint {
+            text-align: center;
+            color: #6b7280;
+            font-size: 13px;
+            margin-top: 12px;
+            font-style: italic;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Scanner DANFE</h1>
+        <h1>📦 Scanner DANFE</h1>
 
-        <!-- Input Nome do Colaborador -->
+        <div id="feedback" class="feedback"></div>
+
         <div class="form-group">
-            <label for="nomeColaborador">Nome do Colaborador:</label>
-            <input 
-                type="text" 
-                id="nomeColaborador" 
-                placeholder="Digite seu nome"
-            >
+            <label for="inputNomeColaborador">👤 Nome do Colaborador</label>
+            <input type="text" id="inputNomeColaborador" placeholder="Digite o nome do colaborador" autocomplete="off">
         </div>
 
-        <!-- Input Nome da Loja -->
         <div class="form-group">
-            <label for="nomeLoja">Nome da Loja:</label>
-            <input 
-                type="text" 
-                id="nomeLoja" 
-                placeholder="Digite o nome da loja"
-            >
+            <label for="inputNomeLoja">🏪 Nome da Loja</label>
+            <input type="text" id="inputNomeLoja" placeholder="Digite o nome da loja" autocomplete="off">
         </div>
 
-        <!-- Botões de Escanear -->
-        <div class="button-group">
-            <button id="btnEscanear" class="btn-primary" disabled>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-                    <circle cx="12" cy="13" r="4"></circle>
-                </svg>
-                Câmera
-            </button>
-            <button id="btnLeitorCodigo" class="btn-secondary" disabled>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                    <rect x="5" y="5" width="14" height="14" rx="2"></rect>
-                </svg>
-                Leitor
-            </button>
-        </div>
+        <button id="btnEscanear" class="btn-primary">
+            📷 Escanear com Câmera
+        </button>
 
-        <!-- Container para Entrada de Código de Barras -->
+        <button id="btnLeitorCodigo" class="btn-secondary">
+            🔍 Usar Leitor de Código de Barras
+        </button>
+
+        <!-- Container do leitor de código invisível -->
         <div id="barcodeInputContainer" class="barcode-input-container">
-            <label for="barcodeInput">📱 Aproxime o leitor de código de barras:</label>
-            <input 
-                type="text" 
-                id="barcodeInput" 
-                placeholder="Leitura automática..."
-                autocomplete="off"
-                class="input-hidden"
-            >
-            <div style="position: relative;">
-                <input 
-                    type="text" 
-                    id="barcodeDisplay" 
-                    placeholder="Código será exibido aqui..."
-                    readonly
-                    style="margin-bottom: 8px;"
-                >
-            </div>
-            <div class="barcode-input-hint">💡 O leitor irá digitar o código automaticamente. Pressione Enter ou aguarde.</div>
-            <button id="btnFecharLeitor" class="btn-danger" style="margin-top: 12px;">Fechar Leitor</button>
+            <input type="text" id="barcodeDisplay" class="barcode-display" placeholder="Aguardando código..." readonly>
+            <div class="barcode-hint">✨ Aponte o leitor para o código de barras</div>
+            <input type="text" id="barcodeInput" class="hidden-barcode-input" autocomplete="off">
         </div>
 
-        <!-- Área da Câmera -->
         <div id="cameraContainer" class="camera-container" style="display: none;">
-            <div style="position: relative;">
-                <video id="video" playsinline autoplay></video>
-                <div class="camera-overlay"></div>
-                <div class="camera-hint">
-                    <span id="statusText" class="status-badge status-searching">🔍 Procurando código...</span>
-                </div>
-            </div>
-            <div class="camera-buttons">
-                <button id="btnFechar" class="btn-danger">Fechar Câmera</button>
-            </div>
+            <video id="video" playsinline></video>
+            <div class="camera-overlay"></div>
+            <div class="camera-hint">Posicione o código de barras dentro da área</div>
         </div>
 
-        <!-- Feedback de Scan -->
-        <div id="feedback" class="feedback" style="display: none;"></div>
-
-        <!-- Lista de Notas Fiscais -->
         <div class="notas-section">
-            <h2>Notas Fiscais Escaneadas (<span id="contador">0</span>)</h2>
-
+            <div class="section-header">
+                <h2>📋 Notas Escaneadas</h2>
+                <span id="contador" class="contador">0</span>
+            </div>
             <div id="listaNotas" class="lista-notas">
                 <p class="empty-state">Nenhuma nota fiscal escaneada ainda</p>
             </div>
-
-            <!-- Botões de Ação -->
-            <div class="action-buttons" id="actionButtons" style="display: none;">
-                <button id="btnExportarJSON" class="btn-success" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="7 10 12 15 17 10"></polyline>
-                        <line x1="12" y1="15" x2="12" y2="3"></line>
-                    </svg>
-                    Exportar para Dashboard
+            <div id="actionButtons" class="action-buttons" style="display: none;">
+                <button id="btnExportarJSON" class="btn-success">
+                    📊 Exportar para Dashboard (JSON)
                 </button>
-                <button id="btnExportar" class="btn-success">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="7 10 12 15 17 10"></polyline>
-                        <line x1="12" y1="15" x2="12" y2="3"></line>
-                    </svg>
-                    Exportar PDF
-                </button>
-                <button id="btnLimpar" class="btn-danger" disabled>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="3 6 5 6 21 6"></polyline>
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                    </svg>
-                    Limpar Todas as NFs
-                </button>
+                <div class="button-group">
+                    <button id="btnExportarPDF" class="btn-primary">
+                        📄 Exportar PDF
+                    </button>
+                    <button id="btnLimpar" class="btn-danger" disabled>
+                        🗑️ Limpar Tudo
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Modal de Confirmação -->
-    <div class="modal-overlay" id="modalConfirmacao">
-        <div class="modal">
-            <h3>✅ Confirmar Nota Fiscal</h3>
-            
+    <div id="modalConfirmacao" class="modal-confirmacao">
+        <div class="modal-content">
+            <div class="modal-header">✅ Confirmar Leitura</div>
             <div class="modal-info">
                 <div class="modal-info-item">
                     <span class="modal-info-label">Colaborador:</span>
-                    <span class="modal-info-value" id="modalColaborador">-</span>
+                    <span id="modalColaborador" class="modal-info-value">-</span>
                 </div>
                 <div class="modal-info-item">
                     <span class="modal-info-label">Loja:</span>
-                    <span class="modal-info-value" id="modalLoja">-</span>
+                    <span id="modalLoja" class="modal-info-value">-</span>
+                </div>
+                <div class="modal-info-item">
+                    <span class="modal-info-label">NF:</span>
+                    <span id="modalNumeroNF" class="modal-info-value">-</span>
                 </div>
             </div>
-
-            <div class="modal-nf" id="modalNumeroNF">000000000</div>
-
-            <label class="checkbox-container" for="checkboxFoto">
-                <input type="checkbox" id="checkboxFoto">
-                <span class="checkbox-label">📸 Tirou foto da nota fiscal?</span>
-            </label>
-
-            <div class="modal-buttons">
-                <button class="btn-modal-cancel" id="btnModalCancelar">
-                    ❌ Cancelar
-                </button>
-                <button class="btn-modal-confirm" id="btnModalConfirmar">
-                    ✅ Confirmar
-                </button>
+            <div id="modalBarcode" class="modal-barcode"></div>
+            <div class="modal-actions">
+                <button id="btnCancelar" class="btn-danger">❌ Cancelar</button>
+                <button id="btnConfirmar" class="btn-success">✅ Confirmar</button>
             </div>
+            <div class="enter-hint">Pressione ENTER para confirmar</div>
         </div>
     </div>
 
-    <!-- Biblioteca jsPDF -->
+    <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <script>
         const { jsPDF } = window.jspdf;
 
-        // Variáveis globais
-        let notasFiscais = [];
-        let stream = null;
-        let barcodeDetector = null;
-        let scannerAtivo = false;
-        let ultimoCodigoLido = null;
-        let timeoutUltimoCodigo = null;
-        let pdfExportado = false;
-        let codigoPendente = null;
-        let modoLeitor = false;
-        let timeoutBarcodeInput = null;
-        
-        // Função para tocar beep
-        function tocarBeep() {
-            try {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                oscillator.frequency.value = 800; // Frequência do beep
-                oscillator.type = 'sine';
-                
-                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
-                
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + 0.2);
-            } catch (error) {
-                console.log('Erro ao tocar beep:', error);
-            }
-        }
-
-        // Elementos do DOM
-        const inputNomeColaborador = document.getElementById('nomeColaborador');
-        const inputNomeLoja = document.getElementById('nomeLoja');
+        // Elementos DOM
+        const inputNomeColaborador = document.getElementById('inputNomeColaborador');
+        const inputNomeLoja = document.getElementById('inputNomeLoja');
         const btnEscanear = document.getElementById('btnEscanear');
         const btnLeitorCodigo = document.getElementById('btnLeitorCodigo');
-        const btnFechar = document.getElementById('btnFechar');
-        const btnFecharLeitor = document.getElementById('btnFecharLeitor');
-        const btnExportarJSON = document.getElementById('btnExportarJSON');
-        const btnExportar = document.getElementById('btnExportar');
-        const btnLimpar = document.getElementById('btnLimpar');
         const cameraContainer = document.getElementById('cameraContainer');
-        const barcodeInputContainer = document.getElementById('barcodeInputContainer');
-        const barcodeInput = document.getElementById('barcodeInput');
-        const barcodeDisplay = document.getElementById('barcodeDisplay');
         const video = document.getElementById('video');
-        const feedback = document.getElementById('feedback');
         const listaNotas = document.getElementById('listaNotas');
         const contador = document.getElementById('contador');
-        const statusText = document.getElementById('statusText');
+        const feedback = document.getElementById('feedback');
+        const btnExportarJSON = document.getElementById('btnExportarJSON');
+        const btnExportarPDF = document.getElementById('btnExportarPDF');
+        const btnLimpar = document.getElementById('btnLimpar');
         const actionButtons = document.getElementById('actionButtons');
 
-        // Modal
-        const modalOverlay = document.getElementById('modalConfirmacao');
+        // Elementos do modal
+        const modalConfirmacao = document.getElementById('modalConfirmacao');
         const modalColaborador = document.getElementById('modalColaborador');
         const modalLoja = document.getElementById('modalLoja');
         const modalNumeroNF = document.getElementById('modalNumeroNF');
-        const checkboxFoto = document.getElementById('checkboxFoto');
-        const btnModalCancelar = document.getElementById('btnModalCancelar');
-        const btnModalConfirmar = document.getElementById('btnModalConfirmar');
+        const modalBarcode = document.getElementById('modalBarcode');
+        const btnCancelar = document.getElementById('btnCancelar');
+        const btnConfirmar = document.getElementById('btnConfirmar');
+
+        // Elementos do leitor de código
+        const barcodeInputContainer = document.getElementById('barcodeInputContainer');
+        const barcodeInput = document.getElementById('barcodeInput');
+        const barcodeDisplay = document.getElementById('barcodeDisplay');
+
+        // Variáveis de controle
+        let notasFiscais = [];
+        let scannerAtivo = false;
+        let stream = null;
+        let pdfExportado = false;
+        let modoLeitor = false;
+        let timeoutBarcodeInput = null;
+        let codigoAtualConfirmacao = null;
+        let temFotoAtual = false;
 
         // Event Listeners
-        inputNomeColaborador.addEventListener('input', validarCampos);
-        inputNomeLoja.addEventListener('input', validarCampos);
-
-        btnEscanear.addEventListener('click', iniciarCamera);
+        btnEscanear.addEventListener('click', iniciarScanner);
         btnLeitorCodigo.addEventListener('click', iniciarLeitorCodigo);
-        btnFechar.addEventListener('click', pararCamera);
-        btnFecharLeitor.addEventListener('click', pararLeitorCodigo);
         btnExportarJSON.addEventListener('click', exportarJSON);
-        btnExportar.addEventListener('click', exportarPDF);
+        btnExportarPDF.addEventListener('click', exportarPDF);
         btnLimpar.addEventListener('click', limparNotas);
+        btnCancelar.addEventListener('click', fecharModal);
+        btnConfirmar.addEventListener('click', confirmarLeitura);
 
-        btnModalCancelar.addEventListener('click', fecharModal);
-        btnModalConfirmar.addEventListener('click', confirmarNota);
-
-        // Event listener para entrada de código de barras
+        // Event listener para o leitor de código de barras
         barcodeInput.addEventListener('input', function(e) {
-            barcodeDisplay.value = e.target.value;
+            const valor = e.target.value;
+            barcodeDisplay.value = valor;
+
+            clearTimeout(timeoutBarcodeInput);
+            timeoutBarcodeInput = setTimeout(() => {
+                if (valor && valor.length > 10) {
+                    processarCodigoLeitor(valor);
+                }
+            }, 100);
         });
 
-        barcodeInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                processarCodigoLeitor(barcodeInput.value);
-            }
-        });
-
-        barcodeInput.addEventListener('change', function() {
-            // Alguns leitores disparam 'change' em vez de 'keypress'
-            processarCodigoLeitor(barcodeInput.value);
-        });
-
-        // Fechar modal ao clicar fora
-        modalOverlay.addEventListener('click', function(e) {
-            if (e.target === modalOverlay) {
-                fecharModal();
+        // Event listener para Enter no modal
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && modalConfirmacao.classList.contains('show')) {
+                e.preventDefault();
+                confirmarLeitura();
             }
         });
 
         // Carregar dados ao iniciar
         carregarDoLocalStorage();
 
-        function validarCampos() {
-            const colaboradorPreenchido = inputNomeColaborador.value.trim();
-            const lojaPreenchida = inputNomeLoja.value.trim();
-            btnEscanear.disabled = !(colaboradorPreenchido && lojaPreenchida);
-            btnLeitorCodigo.disabled = !(colaboradorPreenchido && lojaPreenchida);
-        }
-
         function extrairNumeroNF(codigoBarras) {
-            if (codigoBarras && codigoBarras.length === 44) {
-                return codigoBarras.substring(25, 34);
+            if (!codigoBarras || typeof codigoBarras !== 'string') return null;
+            const codigo = codigoBarras.trim();
+            if (codigo.length >= 44) {
+                return codigo.substring(25, 34);
             }
-            return null;
+            return codigo;
         }
 
-        async function detectarCodigos() {
-            if (!scannerAtivo || !barcodeDetector) return;
+        async function iniciarScanner() {
+            const nomeColaborador = inputNomeColaborador.value.trim();
+            const nomeLoja = inputNomeLoja.value.trim();
 
-            try {
-                const barcodes = await barcodeDetector.detect(video);
-                
-                if (barcodes.length > 0) {
-                    for (const barcode of barcodes) {
-                        const codigo = barcode.rawValue;
-                        console.log('Código detectado:', codigo, 'Tamanho:', codigo.length);
-                        
-                        statusText.textContent = `📷 Código: ${codigo.substring(0, 12)}... (${codigo.length} dígitos)`;
-                        statusText.className = 'status-badge status-detected';
-                        
-                        if (codigo.length === 44) {
-                            if (codigo === ultimoCodigoLido) {
-                                continue;
-                            }
-                            
-                            ultimoCodigoLido = codigo;
-                            clearTimeout(timeoutUltimoCodigo);
-                            timeoutUltimoCodigo = setTimeout(() => {
-                                ultimoCodigoLido = null;
-                            }, 3000);
-                            
-                            // Parar scanner e mostrar modal
-                            mostrarModalConfirmacao(codigo);
-                            return;
-                        }
-                    }
-                }
-                
-                if (scannerAtivo) {
-                    requestAnimationFrame(detectarCodigos);
-                }
-            } catch (error) {
-                console.error('Erro ao detectar código:', error);
-                if (scannerAtivo) {
-                    requestAnimationFrame(detectarCodigos);
-                }
-            }
-        }
-
-        function mostrarModalConfirmacao(codigo) {
-            const numeroNF = extrairNumeroNF(codigo);
-            
-            if (!numeroNF) {
-                mostrarFeedback('❌ Código inválido', '#ef4444');
-                statusText.textContent = '🔍 Procurando código...';
-                statusText.className = 'status-badge status-searching';
-                detectarCodigos();
+            if (!nomeColaborador || !nomeLoja) {
+                mostrarFeedback('❌ Preencha colaborador e loja primeiro', '#ef4444');
                 return;
             }
 
-            codigoPendente = codigo;
-            
-            // Pausar detecção
-            scannerAtivo = false;
-            
-            // Tocar beep quando detectar código válido
-            tocarBeep();
-            
-            // Preencher modal
-            modalColaborador.textContent = inputNomeColaborador.value.trim();
-            modalLoja.textContent = inputNomeLoja.value.trim();
-            modalNumeroNF.textContent = numeroNF;
-            checkboxFoto.checked = false;
-            
-            // Prevenir scroll do body
-            document.body.classList.add('modal-open');
-            
-            // Mostrar modal
-            modalOverlay.classList.add('show');
-        }
+            scannerAtivo = true;
+            cameraContainer.style.display = 'block';
+            btnEscanear.style.display = 'none';
+            btnLeitorCodigo.style.display = 'none';
 
-        function fecharModal() {
-            modalOverlay.classList.remove('show');
-            document.body.classList.remove('modal-open');
-            codigoPendente = null;
-            
-            // Retomar detecção
-            if (stream && !modoLeitor) {
-                scannerAtivo = true;
-                statusText.textContent = '🔍 Procurando código...';
-                statusText.className = 'status-badge status-searching';
-                detectarCodigos();
-            } else if (modoLeitor) {
-                barcodeInput.focus();
-            }
-        }
-
-        function confirmarNota() {
-            if (!codigoPendente) return;
-            
-            const temFoto = checkboxFoto.checked;
-            processarCodigo(codigoPendente, temFoto);
-            
-            modalOverlay.classList.remove('show');
-            document.body.classList.remove('modal-open');
-            codigoPendente = null;
-            
-            // Retomar leitura imediatamente
-            if (stream && !modoLeitor) {
-                // Modo câmera - retomar detecção
-                scannerAtivo = true;
-                statusText.textContent = '🔍 Procurando código...';
-                statusText.className = 'status-badge status-searching';
-                detectarCodigos();
-            } else if (modoLeitor) {
-                // Modo leitor - focar no input para próxima leitura
-                barcodeInput.value = '';
-                barcodeDisplay.value = '';
-                barcodeInput.focus();
-            }
-        }
-
-        async function iniciarCamera() {
             try {
-                if (!('BarcodeDetector' in window)) {
-                    alert('⚠️ Seu navegador não suporta detecção nativa de código de barras.\n\nUse o Google Chrome ou Edge no Android.');
-                    return;
-                }
-
-                const formats = await BarcodeDetector.getSupportedFormats();
-                barcodeDetector = new BarcodeDetector({ formats: formats });
-
                 stream = await navigator.mediaDevices.getUserMedia({
-                    video: {
-                        facingMode: 'environment',
-                        width: { ideal: 1920 },
-                        height: { ideal: 1080 }
+                    video: { facingMode: 'environment' }
+                });
+                video.srcObject = stream;
+                video.play();
+
+                Quagga.init({
+                    inputStream: {
+                        name: "Live",
+                        type: "LiveStream",
+                        target: video,
+                        constraints: {
+                            facingMode: "environment"
+                        },
+                    },
+                    decoder: {
+                        readers: ["code_128_reader", "ean_reader", "ean_8_reader", "code_39_reader", "i2of5_reader"]
+                    },
+                    locate: true
+                }, function (err) {
+                    if (err) {
+                        console.error(err);
+                        mostrarFeedback('❌ Erro ao iniciar câmera', '#ef4444');
+                        pararScanner();
+                        return;
+                    }
+                    Quagga.start();
+                });
+
+                Quagga.onDetected(function (result) {
+                    if (result && result.codeResult && result.codeResult.code) {
+                        const codigo = result.codeResult.code;
+                        pararScanner();
+                        mostrarModalConfirmacao(codigo, true);
                     }
                 });
 
-                video.srcObject = stream;
-                cameraContainer.style.display = 'block';
-                barcodeInputContainer.classList.remove('show');
-                modoLeitor = false;
-                btnEscanear.style.display = 'none';
-                btnLeitorCodigo.style.display = 'none';
-                scannerAtivo = true;
-
-                await video.play();
-
-                statusText.textContent = '🔍 Procurando código...';
-                statusText.className = 'status-badge status-searching';
-                
-                detectarCodigos();
-
             } catch (error) {
-                console.error('Erro ao iniciar câmera:', error);
-                alert('Erro ao acessar a câmera: ' + error.message);
-                pararCamera();
+                console.error('Erro ao acessar câmera:', error);
+                mostrarFeedback('❌ Erro ao acessar câmera', '#ef4444');
+                pararScanner();
             }
         }
 
-        function pararCamera() {
+        function pararScanner() {
             scannerAtivo = false;
             
             if (stream) {
@@ -1080,24 +783,32 @@
                 stream = null;
             }
 
-            video.srcObject = null;
+            if (typeof Quagga !== 'undefined') {
+                Quagga.stop();
+            }
+
             cameraContainer.style.display = 'none';
             btnEscanear.style.display = 'flex';
             btnLeitorCodigo.style.display = 'flex';
         }
 
         function iniciarLeitorCodigo() {
+            const nomeColaborador = inputNomeColaborador.value.trim();
+            const nomeLoja = inputNomeLoja.value.trim();
+
+            if (!nomeColaborador || !nomeLoja) {
+                mostrarFeedback('❌ Preencha colaborador e loja primeiro', '#ef4444');
+                return;
+            }
+
             modoLeitor = true;
             barcodeInputContainer.classList.add('show');
             cameraContainer.style.display = 'none';
             btnEscanear.style.display = 'none';
             btnLeitorCodigo.style.display = 'none';
-            
-            // Limpar campos anteriores
+
             barcodeInput.value = '';
             barcodeDisplay.value = '';
-            
-            // Focar no input (invisível) para receber dados do leitor
             barcodeInput.focus();
         }
 
@@ -1108,19 +819,56 @@
             barcodeDisplay.value = '';
             btnEscanear.style.display = 'flex';
             btnLeitorCodigo.style.display = 'flex';
-            
             clearTimeout(timeoutBarcodeInput);
         }
 
         function processarCodigoLeitor(codigo) {
             if (!codigo || codigo.trim() === '') return;
 
-            // Limpar o input para próxima leitura
             barcodeInput.value = '';
             barcodeDisplay.value = '';
             barcodeInput.focus();
 
-            mostrarModalConfirmacao(codigo.trim());
+            mostrarModalConfirmacao(codigo.trim(), false);
+        }
+
+        function mostrarModalConfirmacao(codigo, temFoto = false) {
+            const numeroNF = extrairNumeroNF(codigo);
+            const nomeColaborador = inputNomeColaborador.value.trim();
+            const nomeLoja = inputNomeLoja.value.trim();
+
+            codigoAtualConfirmacao = codigo;
+            temFotoAtual = temFoto;
+
+            modalColaborador.textContent = nomeColaborador;
+            modalLoja.textContent = nomeLoja;
+            modalNumeroNF.textContent = numeroNF || 'Não identificado';
+            modalBarcode.textContent = codigo;
+
+            modalConfirmacao.classList.add('show');
+            document.body.classList.add('modal-open');
+
+            // Focar no botão confirmar para permitir Enter
+            btnConfirmar.focus();
+        }
+
+        function fecharModal() {
+            modalConfirmacao.classList.remove('show');
+            document.body.classList.remove('modal-open');
+            codigoAtualConfirmacao = null;
+            temFotoAtual = false;
+
+            // Retornar ao modo leitor se estava ativo
+            if (modoLeitor) {
+                barcodeInput.focus();
+            }
+        }
+
+        function confirmarLeitura() {
+            if (!codigoAtualConfirmacao) return;
+
+            processarCodigo(codigoAtualConfirmacao, temFotoAtual);
+            fecharModal();
         }
 
         function processarCodigo(codigoBarras, temFoto = false) {
@@ -1139,7 +887,6 @@
 
             if (jaExiste) {
                 mostrarFeedback('⚠️ Esta nota já foi escaneada!', '#f59e0b');
-                // Não fechar - continuar escaneando
                 return;
             }
 
@@ -1163,11 +910,28 @@
             atualizarLista();
             mostrarFeedback(`✓ NF ${numeroNF} salva${temFoto ? ' com foto' : ''}!`, '#10b981');
             salvarNoLocalStorage();
-            
+            salvarNoBackend(novaEntrada);
+
             pdfExportado = false;
             btnLimpar.disabled = true;
+        }
 
-            // Removido o fechamento automático - continua escaneando
+        async function salvarNoBackend(nota) {
+            try {
+                const response = await fetch('http://localhost:3000/api/salvar-nota', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(nota)
+                });
+
+                if (!response.ok) {
+                    console.error('Erro ao salvar no backend');
+                }
+            } catch (error) {
+                console.error('Erro de conexão com backend:', error);
+            }
         }
 
         function atualizarLista() {
@@ -1195,7 +959,7 @@
             feedback.textContent = mensagem;
             feedback.style.background = cor;
             feedback.style.display = 'block';
-            
+
             setTimeout(() => {
                 feedback.style.display = 'none';
             }, 3000);
@@ -1217,13 +981,14 @@
             }
         }
 
-        function exportarJSON() {
+        async function exportarJSON() {
             if (notasFiscais.length === 0) {
                 mostrarFeedback('❌ Nenhuma nota para exportar', '#ef4444');
                 return;
             }
 
             try {
+                // Salvar localmente
                 const dataStr = JSON.stringify(notasFiscais, null, 2);
                 const dataBlob = new Blob([dataStr], { type: 'application/json' });
                 const url = URL.createObjectURL(dataBlob);
@@ -1233,6 +998,15 @@
                 link.download = `dados_dashboard_${dataAtual}.json`;
                 link.click();
                 URL.revokeObjectURL(url);
+
+                // Enviar para backend
+                await fetch('http://localhost:3000/api/exportar-json', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ notas: notasFiscais })
+                });
 
                 mostrarFeedback('✓ Dados exportados para Dashboard!', '#10b981');
             } catch (error) {
@@ -1250,7 +1024,7 @@
                 const doc = new jsPDF();
                 const pageWidth = doc.internal.pageSize.getWidth();
                 const pageHeight = doc.internal.pageSize.getHeight();
-                
+
                 const notasPorLoja = {};
                 notasFiscais.forEach(nota => {
                     if (!notasPorLoja[nota.loja]) {
@@ -1314,11 +1088,10 @@
 
                 const dataAtual = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
                 doc.save(`relatorio_notas_${dataAtual}.pdf`);
-                
-                // Habilitar botão de limpar após exportar PDF
+
                 pdfExportado = true;
                 btnLimpar.disabled = false;
-                
+
                 mostrarFeedback('✓ PDF exportado com sucesso!', '#10b981');
             } catch (error) {
                 console.error('Erro ao exportar PDF:', error);

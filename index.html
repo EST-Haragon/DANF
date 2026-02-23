@@ -598,6 +598,30 @@
             letter-spacing: 1px; padding: 2px 8px;
             background: rgba(74,92,47,0.3); border-radius: 2px; color: var(--smoke);
         }
+
+        /* Engine badge */
+        .engine-badge {
+            display: inline-block;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 2px;
+            padding: 4px 12px;
+            border-radius: 1px;
+            margin-bottom: 10px;
+            width: 100%;
+            text-align: center;
+        }
+        .engine-badge.native   { background: rgba(127,255,0,0.1); color: var(--neon); border: 1px solid rgba(127,255,0,0.3); }
+        .engine-badge.fallback { background: rgba(240,192,64,0.1); color: #f0c040; border: 1px solid rgba(240,192,64,0.3); }
+
+        /* Destaque dos dígitos no modal */
+        .modal-barcode .digitos-ok    { color: var(--neon); font-size: 12px; }
+        .modal-barcode .digitos-alerta{ color: #f0c040; font-size: 12px; }
+        .modal-barcode .len-badge {
+            display: inline-block; margin-top: 6px; font-size: 10px;
+            letter-spacing: 1px; padding: 2px 8px;
+            background: rgba(74,92,47,0.3); border-radius: 2px; color: var(--smoke);
+        }
         .enter-hint {
             text-align: center;
             color: rgba(143,170,114,0.45);
@@ -660,10 +684,12 @@
             </button>
         </div>
 
+        <div id="engineBadge" class="engine-badge">⬡ VERIFICANDO SUPORTE...</div>
+
         <div id="cameraContainer" class="camera-container" style="display: none;">
             <video id="video" playsinline></video>
             <div class="camera-overlay"></div>
-            <div class="camera-hint">⬡ POSICIONE O CÓDIGO DENTRO DA ÁREA</div>
+            <div class="camera-hint" id="cameraHint">⬡ POSICIONE O CÓDIGO DENTRO DA ÁREA</div>
             <button id="btnFecharCamera" class="btn-close-camera">
                 ✕ FECHAR CÂMERA
             </button>
@@ -720,61 +746,59 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- ZXing fallback para browsers sem BarcodeDetector nativo -->
+    <script src="https://unpkg.com/@zxing/library@latest/umd/index.min.js"></script>
 
     <script>
     const { jsPDF } = window.jspdf;
 
     // ─── DOM ───────────────────────────────────────────────
-    const inputNomeColaborador = document.getElementById('inputNomeColaborador');
-    const inputNomeLoja        = document.getElementById('inputNomeLoja');
-    const btnEscanear          = document.getElementById('btnEscanear');
-    const btnLeitorCodigo      = document.getElementById('btnLeitorCodigo');
-    const cameraContainer      = document.getElementById('cameraContainer');
-    const video                = document.getElementById('video');
-    const listaNotas           = document.getElementById('listaNotas');
-    const contador             = document.getElementById('contador');
-    const feedback             = document.getElementById('feedback');
-    const btnExportarJSON      = document.getElementById('btnExportarJSON');
-    const btnExportarPDF       = document.getElementById('btnExportarPDF');
-    const btnLimpar            = document.getElementById('btnLimpar');
-    const actionButtons        = document.getElementById('actionButtons');
-    const modalConfirmacao     = document.getElementById('modalConfirmacao');
-    const modalColaborador     = document.getElementById('modalColaborador');
-    const modalLoja            = document.getElementById('modalLoja');
-    const modalNumeroNF        = document.getElementById('modalNumeroNF');
-    const modalBarcode         = document.getElementById('modalBarcode');
-    const btnCancelar          = document.getElementById('btnCancelar');
-    const btnConfirmar         = document.getElementById('btnConfirmar');
-    const barcodeInputContainer= document.getElementById('barcodeInputContainer');
-    const barcodeInput         = document.getElementById('barcodeInput');
-    const barcodeDisplay       = document.getElementById('barcodeDisplay');
+    const inputNomeColaborador  = document.getElementById('inputNomeColaborador');
+    const inputNomeLoja         = document.getElementById('inputNomeLoja');
+    const btnEscanear           = document.getElementById('btnEscanear');
+    const btnLeitorCodigo       = document.getElementById('btnLeitorCodigo');
+    const cameraContainer       = document.getElementById('cameraContainer');
+    const video                 = document.getElementById('video');
+    const listaNotas            = document.getElementById('listaNotas');
+    const contador              = document.getElementById('contador');
+    const feedback              = document.getElementById('feedback');
+    const btnExportarJSON       = document.getElementById('btnExportarJSON');
+    const btnExportarPDF        = document.getElementById('btnExportarPDF');
+    const btnLimpar             = document.getElementById('btnLimpar');
+    const actionButtons         = document.getElementById('actionButtons');
+    const modalConfirmacao      = document.getElementById('modalConfirmacao');
+    const modalColaborador      = document.getElementById('modalColaborador');
+    const modalLoja             = document.getElementById('modalLoja');
+    const modalNumeroNF         = document.getElementById('modalNumeroNF');
+    const modalBarcode          = document.getElementById('modalBarcode');
+    const btnCancelar           = document.getElementById('btnCancelar');
+    const btnConfirmar          = document.getElementById('btnConfirmar');
+    const barcodeInputContainer = document.getElementById('barcodeInputContainer');
+    const barcodeInput          = document.getElementById('barcodeInput');
+    const barcodeDisplay        = document.getElementById('barcodeDisplay');
+    const cameraHint            = document.getElementById('cameraHint');
+    const engineBadge           = document.getElementById('engineBadge');
 
     // ─── ESTADO ────────────────────────────────────────────
-    let notasFiscais           = [];
-    let scannerAtivo           = false;
-    let stream                 = null;
-    let pdfExportado           = false;
-    let modoLeitor             = false;
-    let codigoAtualConfirmacao = null;
-    let temFotoAtual           = false;
+    let notasFiscais            = [];
+    let scannerAtivo            = false;
+    let stream                  = null;
+    let pdfExportado            = false;
+    let modoLeitor              = false;
+    let codigoAtualConfirmacao  = null;
+    let temFotoAtual            = false;
+    let rafId                   = null;   // requestAnimationFrame do BarcodeDetector
+    let zxingReader             = null;   // instância ZXing
 
-    // ─── Sistema de votação para câmera ────────────────────
-    // O mesmo código precisa aparecer MIN_VOTOS vezes seguidas para ser aceito
-    const MIN_VOTOS  = 3;
-    const MIN_LEN    = 20;
-    let votacoes     = {};
-    let ultimoCodigo = '';
-
-    // ─── Buffer para leitor físico ─────────────────────────
-    // Leitors enviam chars muito rápido; aguardamos pausa para considerar completo
-    const PAUSA_LEITOR = 200; // ms de silêncio após último char
+    // ─── LEITOR FÍSICO ─────────────────────────────────────
+    const MIN_LEN      = 20;
+    const PAUSA_LEITOR = 200;
     let bufferLeitor   = '';
     let timerLeitor    = null;
     let ultimoKeyTime  = 0;
 
-    // ─── EVENTOS ───────────────────────────────────────────
+    // ─── EVENTOS BASE ──────────────────────────────────────
     btnEscanear.addEventListener('click', iniciarScanner);
     btnLeitorCodigo.addEventListener('click', iniciarLeitorCodigo);
     document.getElementById('btnFecharCamera').addEventListener('click', pararScanner);
@@ -787,25 +811,241 @@
 
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Enter' && modalConfirmacao.classList.contains('show')) {
-            e.preventDefault();
-            confirmarLeitura();
-            return;
+            e.preventDefault(); confirmarLeitura(); return;
         }
-        if (modoLeitor && !modalConfirmacao.classList.contains('show')) {
-            capturarTeclaLeitor(e);
-        }
+        if (modoLeitor && !modalConfirmacao.classList.contains('show')) capturarTeclaLeitor(e);
     });
 
     carregarDoLocalStorage();
 
     // ═══════════════════════════════════════════════════════
-    //  LEITOR FÍSICO – captura por keydown
+    //  DETECÇÃO DE ENGINE
+    //  Prioridade: BarcodeDetector (nativo) → ZXing (JS)
+    // ═══════════════════════════════════════════════════════
+    const NATIVE_SUPPORTED = ('BarcodeDetector' in window);
+
+    function setEngineBadge(txt, ok) {
+        engineBadge.textContent = txt;
+        engineBadge.className   = 'engine-badge ' + (ok ? 'native' : 'fallback');
+    }
+
+    // Mostra a engine disponível ao carregar
+    if (NATIVE_SUPPORTED) {
+        BarcodeDetector.getSupportedFormats().then(fmts => {
+            const temCode128 = fmts.includes('code_128');
+            setEngineBadge(
+                '⬡ NATIVE BARCODE API' + (temCode128 ? ' · CODE128 ✓' : ''),
+                true
+            );
+        }).catch(() => setEngineBadge('⬡ NATIVE BARCODE API', true));
+    } else {
+        setEngineBadge('⬡ ZXING JS (FALLBACK)', false);
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  CÂMERA – iniciar / parar
+    // ═══════════════════════════════════════════════════════
+    async function iniciarScanner() {
+        const nomeColaborador = inputNomeColaborador.value.trim();
+        const nomeLoja        = inputNomeLoja.value.trim();
+        if (!nomeColaborador || !nomeLoja) {
+            mostrarFeedback('❌ Preencha colaborador e loja primeiro', '#c0392b');
+            return;
+        }
+
+        scannerAtivo = true;
+        cameraContainer.style.display = 'block';
+        btnEscanear.style.display     = 'none';
+        btnLeitorCodigo.style.display = 'none';
+        cameraHint.textContent        = '⬡ INICIANDO...';
+
+        try {
+            // Solicita câmera traseira em alta resolução
+            stream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: { ideal: 'environment' },
+                    width:  { ideal: 1920 },
+                    height: { ideal: 1080 }
+                }
+            });
+            video.srcObject = stream;
+            await video.play();
+            cameraHint.textContent = '⬡ POSICIONE O CÓDIGO DENTRO DA ÁREA';
+
+            if (NATIVE_SUPPORTED) {
+                iniciarBarcodeDetectorNativo();
+            } else {
+                await iniciarZXing();
+            }
+        } catch(err) {
+            console.error('[CAMERA]', err);
+            mostrarFeedback('❌ Erro ao acessar câmera', '#c0392b');
+            pararScanner();
+        }
+    }
+
+    function pararScanner() {
+        scannerAtivo = false;
+
+        // Para loops de leitura
+        if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+        if (zxingReader) {
+            try { zxingReader.reset(); } catch(e) {}
+            zxingReader = null;
+        }
+
+        // Para stream da câmera
+        if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+
+        cameraContainer.style.display = 'none';
+        btnEscanear.style.display     = 'flex';
+        btnLeitorCodigo.style.display = 'flex';
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  ENGINE 1 – BarcodeDetector (nativo do hardware)
+    //  Disponível: Android Chrome 83+, Samsung Internet,
+    //              macOS Ventura Safari 17+
+    // ═══════════════════════════════════════════════════════
+    function iniciarBarcodeDetectorNativo() {
+        // Formatos que o DANFE usa (Code128 é o principal)
+        const detector = new BarcodeDetector({
+            formats: ['code_128', 'itf', 'ean_13', 'ean_8', 'code_39', 'qr_code']
+        });
+
+        let ultimoCodigo = '';
+        let contagemVotos = 0;
+        const MIN_VOTOS = 2; // BarcodeDetector é muito mais preciso; 2 já basta
+
+        async function loop() {
+            if (!scannerAtivo) return;
+
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                try {
+                    const barcodes = await detector.detect(video);
+                    if (barcodes.length > 0) {
+                        // Pega o código mais longo (mais provável de ser o DANFE de 44 dig.)
+                        const melhor = barcodes.reduce((a, b) =>
+                            a.rawValue.length >= b.rawValue.length ? a : b
+                        );
+                        const raw   = melhor.rawValue;
+                        const limpo = raw.replace(/\D/g, '');
+
+                        if (limpo.length >= MIN_LEN) {
+                            if (limpo === ultimoCodigo) {
+                                contagemVotos++;
+                            } else {
+                                ultimoCodigo  = limpo;
+                                contagemVotos = 1;
+                            }
+
+                            cameraHint.textContent = `⬡ ${limpo.length} DÍGITOS · ${contagemVotos}/${MIN_VOTOS}`;
+
+                            if (contagemVotos >= MIN_VOTOS) {
+                                pararScanner();
+                                mostrarModalConfirmacao(limpo, true);
+                                return;
+                            }
+                        } else {
+                            cameraHint.textContent = '⬡ CÓDIGO DETECTADO – APROXIME MAIS';
+                        }
+                    } else {
+                        cameraHint.textContent = '⬡ POSICIONE O CÓDIGO DENTRO DA ÁREA';
+                    }
+                } catch(e) {
+                    // detector.detect pode falhar em frames ruins — ignora e continua
+                }
+            }
+
+            rafId = requestAnimationFrame(loop);
+        }
+
+        rafId = requestAnimationFrame(loop);
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  ENGINE 2 – ZXing-js (fallback JS puro)
+    //  Funciona em qualquer browser moderno
+    // ═══════════════════════════════════════════════════════
+    async function iniciarZXing() {
+        if (typeof ZXing === 'undefined') {
+            mostrarFeedback('❌ ZXing não carregou. Verifique a conexão.', '#c0392b');
+            pararScanner(); return;
+        }
+
+        const hints = new Map();
+        const formats = [
+            ZXing.BarcodeFormat.CODE_128,
+            ZXing.BarcodeFormat.ITF,
+            ZXing.BarcodeFormat.EAN_13,
+            ZXing.BarcodeFormat.EAN_8,
+            ZXing.BarcodeFormat.CODE_39
+        ];
+        hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, formats);
+        hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
+
+        const reader = new ZXing.MultiFormatReader();
+        reader.setHints(hints);
+        zxingReader = reader;
+
+        const canvas  = document.createElement('canvas');
+        const ctx     = canvas.getContext('2d', { willReadFrequently: true });
+
+        let ultimoCodigo  = '';
+        let contagemVotos = 0;
+        const MIN_VOTOS   = 3;
+
+        function loop() {
+            if (!scannerAtivo) return;
+
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                canvas.width  = video.videoWidth;
+                canvas.height = video.videoHeight;
+                ctx.drawImage(video, 0, 0);
+
+                try {
+                    const imgData    = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const luminance  = new ZXing.RGBLuminanceSource(imgData.data, canvas.width, canvas.height);
+                    const binary     = new ZXing.HybridBinarizer(luminance);
+                    const bitmap     = new ZXing.BinaryBitmap(binary);
+                    const result     = reader.decode(bitmap);
+                    const raw        = result.getText();
+                    const limpo      = raw.replace(/\D/g, '');
+
+                    if (limpo.length >= MIN_LEN) {
+                        if (limpo === ultimoCodigo) {
+                            contagemVotos++;
+                        } else {
+                            ultimoCodigo  = limpo;
+                            contagemVotos = 1;
+                        }
+
+                        cameraHint.textContent = `⬡ ${limpo.length} DÍGITOS · ${contagemVotos}/${MIN_VOTOS}`;
+
+                        if (contagemVotos >= MIN_VOTOS) {
+                            pararScanner();
+                            mostrarModalConfirmacao(limpo, true);
+                            return;
+                        }
+                    }
+                } catch(e) {
+                    // NotFoundException é normal quando não há código no frame
+                    cameraHint.textContent = '⬡ POSICIONE O CÓDIGO DENTRO DA ÁREA';
+                }
+            }
+
+            rafId = requestAnimationFrame(loop);
+        }
+
+        rafId = requestAnimationFrame(loop);
+    }
+
+    // ═══════════════════════════════════════════════════════
+    //  LEITOR FÍSICO (pistola / USB)
     // ═══════════════════════════════════════════════════════
     function capturarTeclaLeitor(e) {
         const agora = Date.now();
-        if (agora - ultimoKeyTime > 500 && bufferLeitor.length > 0) {
-            bufferLeitor = '';
-        }
+        if (agora - ultimoKeyTime > 500 && bufferLeitor.length > 0) bufferLeitor = '';
         ultimoKeyTime = agora;
 
         if (e.key.length !== 1 && e.key !== 'Enter') return;
@@ -826,10 +1066,10 @@
             if (bufferLeitor.length >= MIN_LEN) {
                 finalizarLeituraLeitor(bufferLeitor);
             } else if (bufferLeitor.length > 0) {
-                barcodeDisplay.value = '';
+                barcodeDisplay.value       = '';
                 barcodeDisplay.placeholder = `⚠ INCOMPLETO: ${bufferLeitor.length} dígitos`;
                 setTimeout(() => {
-                    bufferLeitor = '';
+                    bufferLeitor               = '';
                     barcodeDisplay.placeholder = '// AGUARDANDO CÓDIGO //';
                 }, 2000);
             }
@@ -837,17 +1077,17 @@
     }
 
     function atualizarDisplayLeitor(codigo) {
-        barcodeDisplay.value = codigo.length > 0 ? codigo : '';
+        barcodeDisplay.value       = codigo.length > 0 ? codigo : '';
         barcodeDisplay.placeholder = codigo.length > 0 ? '' : '// AGUARDANDO CÓDIGO //';
     }
 
     function finalizarLeituraLeitor(codigo) {
         const limpo = codigo.replace(/\D/g, '');
-        bufferLeitor = '';
-        barcodeDisplay.value = '';
+        bufferLeitor               = '';
+        barcodeDisplay.value       = '';
         barcodeDisplay.placeholder = '// AGUARDANDO CÓDIGO //';
         if (limpo.length < MIN_LEN) return;
-        if (limpo.length !== 44) console.warn(`[LEITOR] ${limpo.length} dígitos (esperado 44):`, limpo);
+        if (limpo.length !== 44) console.warn(`[LEITOR] ${limpo.length} dígitos:`, limpo);
         mostrarModalConfirmacao(limpo, false);
     }
 
@@ -865,106 +1105,14 @@
         }
     });
 
-    // ═══════════════════════════════════════════════════════
-    //  CÂMERA – Quagga otimizado para 44 dígitos
-    // ═══════════════════════════════════════════════════════
-    async function iniciarScanner() {
-        const nomeColaborador = inputNomeColaborador.value.trim();
-        const nomeLoja        = inputNomeLoja.value.trim();
-        if (!nomeColaborador || !nomeLoja) {
-            mostrarFeedback('❌ Preencha colaborador e loja primeiro', '#c0392b');
-            return;
-        }
-        scannerAtivo = true;
-        votacoes = {}; ultimoCodigo = '';
-        cameraContainer.style.display = 'block';
-        btnEscanear.style.display     = 'none';
-        btnLeitorCodigo.style.display = 'none';
-
-        try {
-            stream = await navigator.mediaDevices.getUserMedia({
-                video: {
-                    facingMode: 'environment',
-                    width:  { ideal: 1920, min: 1280 },
-                    height: { ideal: 1080, min: 720  }
-                }
-            });
-            video.srcObject = stream;
-            await video.play();
-
-            Quagga.init({
-                inputStream: {
-                    name: 'Live', type: 'LiveStream', target: video,
-                    constraints: { facingMode: 'environment', width: { min: 1280 }, height: { min: 720 } },
-                    area: { top: '30%', right: '5%', left: '5%', bottom: '30%' }
-                },
-                decoder: {
-                    readers: [
-                        { format: 'code_128_reader', config: {} },
-                        { format: 'i2of5_reader',    config: {} }
-                    ],
-                    multiple: false
-                },
-                locator: { halfSample: false, patchSize: 'medium' },
-                locate: true,
-                frequency: 15
-            }, function(err) {
-                if (err) {
-                    console.error('[QUAGGA]', err);
-                    mostrarFeedback('❌ Erro ao iniciar câmera', '#c0392b');
-                    pararScanner(); return;
-                }
-                Quagga.start();
-            });
-
-            Quagga.onDetected(function(result) {
-                if (!result || !result.codeResult) return;
-
-                const raw    = result.codeResult.code;
-                const errors = result.codeResult.decodedCodes
-                    ? result.codeResult.decodedCodes
-                        .filter(x => x.error !== undefined)
-                        .reduce((s, x) => s + x.error, 0)
-                    : 1;
-
-                if (errors > 0.25) return;  // leitura ruidosa, descarta
-
-                const limpo = raw.replace(/\D/g, '');
-                if (limpo.length < MIN_LEN) return;
-
-                if (limpo !== ultimoCodigo) { votacoes = {}; ultimoCodigo = limpo; }
-                votacoes[limpo] = (votacoes[limpo] || 0) + 1;
-
-                if (votacoes[limpo] >= MIN_VOTOS) {
-                    pararScanner();
-                    mostrarModalConfirmacao(limpo, true);
-                }
-            });
-
-        } catch (error) {
-            console.error('[CAMERA]', error);
-            mostrarFeedback('❌ Erro ao acessar câmera', '#c0392b');
-            pararScanner();
-        }
-    }
-
-    function pararScanner() {
-        scannerAtivo = false; votacoes = {}; ultimoCodigo = '';
-        if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
-        try { Quagga.stop(); } catch(e) {}
-        cameraContainer.style.display = 'none';
-        btnEscanear.style.display     = 'flex';
-        btnLeitorCodigo.style.display = 'flex';
-    }
-
     function iniciarLeitorCodigo() {
         const nomeColaborador = inputNomeColaborador.value.trim();
         const nomeLoja        = inputNomeLoja.value.trim();
         if (!nomeColaborador || !nomeLoja) {
-            mostrarFeedback('❌ Preencha colaborador e loja primeiro', '#c0392b');
-            return;
+            mostrarFeedback('❌ Preencha colaborador e loja primeiro', '#c0392b'); return;
         }
-        modoLeitor = true; bufferLeitor = '';
+        modoLeitor   = true;
+        bufferLeitor = '';
         barcodeInputContainer.classList.add('show');
         btnEscanear.style.display     = 'none';
         btnLeitorCodigo.style.display = 'none';
@@ -973,7 +1121,8 @@
     }
 
     function pararLeitorCodigo() {
-        modoLeitor = false; bufferLeitor = '';
+        modoLeitor   = false;
+        bufferLeitor = '';
         clearTimeout(timerLeitor);
         barcodeInputContainer.classList.remove('show');
         btnEscanear.style.display     = 'flex';
@@ -983,11 +1132,11 @@
     // ═══════════════════════════════════════════════════════
     //  MODAL + PROCESSAMENTO
     // ═══════════════════════════════════════════════════════
-    function extrairNumeroNF(codigoBarras) {
-        if (!codigoBarras || typeof codigoBarras !== 'string') return null;
-        const c = codigoBarras.replace(/\D/g, '');
-        if (c.length >= 44) return c.substring(25, 34).replace(/^0+/, '') || c.substring(25, 34);
-        return c;
+    function extrairNumeroNF(c) {
+        if (!c) return null;
+        const s = c.replace(/\D/g, '');
+        if (s.length >= 44) return s.substring(25, 34).replace(/^0+/, '') || s.substring(25, 34);
+        return s;
     }
 
     function mostrarModalConfirmacao(codigo, temFoto = false) {
@@ -1046,28 +1195,28 @@
         mostrarFeedback(`✓ NF ${numeroNF} salva${temFoto ? ' com foto' : ''}!`, '#3a5c1f');
         salvarNoLocalStorage();
         salvarNoBackend(novaEntrada);
-        pdfExportado = false;
+        pdfExportado       = false;
         btnLimpar.disabled = true;
     }
 
     async function salvarNoBackend(nota) {
         try {
             const r = await fetch('http://localhost:3000/api/salvar-nota', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                method:'POST', headers:{'Content-Type':'application/json'},
                 body: JSON.stringify(nota)
             });
-            if (!r.ok) console.error('Erro ao salvar no backend');
+            if (!r.ok) console.error('Erro backend');
         } catch(e) { console.error('Backend:', e); }
     }
 
     function atualizarLista() {
         if (!notasFiscais.length) {
-            listaNotas.innerHTML = '<p class="empty-state">// nenhuma nota escaneada ainda</p>';
+            listaNotas.innerHTML        = '<p class="empty-state">// nenhuma nota escaneada ainda</p>';
             actionButtons.style.display = 'none';
-            contador.textContent = '0'; return;
+            contador.textContent        = '0'; return;
         }
         actionButtons.style.display = 'flex';
-        contador.textContent = notasFiscais.length;
+        contador.textContent        = notasFiscais.length;
         listaNotas.innerHTML = notasFiscais.map(nota => `
             <div class="nota-card">
                 <div class="nota-colaborador">${nota.colaborador}</div>
@@ -1079,9 +1228,9 @@
     }
 
     function mostrarFeedback(msg, cor) {
-        feedback.textContent = msg;
-        feedback.style.background = cor;
-        feedback.style.display = 'block';
+        feedback.textContent       = msg;
+        feedback.style.background  = cor;
+        feedback.style.display     = 'block';
         setTimeout(() => { feedback.style.display = 'none'; }, 3000);
     }
 
@@ -1095,14 +1244,12 @@
     async function exportarJSON() {
         if (!notasFiscais.length) { mostrarFeedback('❌ Nenhuma nota para exportar', '#c0392b'); return; }
         try {
-            const blob = new Blob([JSON.stringify(notasFiscais, null, 2)], { type: 'application/json' });
+            const blob = new Blob([JSON.stringify(notasFiscais, null, 2)], {type:'application/json'});
             const url  = URL.createObjectURL(blob);
-            const a    = document.createElement('a');
-            a.href = url;
-            a.download = `dados_dashboard_${new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')}.json`;
+            const a    = Object.assign(document.createElement('a'), { href: url, download: `dados_dashboard_${new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')}.json` });
             a.click(); URL.revokeObjectURL(url);
             await fetch('http://localhost:3000/api/exportar-json', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                method:'POST', headers:{'Content-Type':'application/json'},
                 body: JSON.stringify({ notas: notasFiscais })
             });
             mostrarFeedback('✓ Dados exportados para Dashboard!', '#3a5c1f');
@@ -1138,7 +1285,8 @@
                 });
             });
             doc.save(`relatorio_notas_${new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')}.pdf`);
-            pdfExportado = true; btnLimpar.disabled = false;
+            pdfExportado       = true;
+            btnLimpar.disabled = false;
             mostrarFeedback('✓ PDF exportado com sucesso!', '#3a5c1f');
         } catch(e) { mostrarFeedback('❌ Erro ao exportar PDF', '#c0392b'); }
     }

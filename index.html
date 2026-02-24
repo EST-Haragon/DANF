@@ -622,6 +622,85 @@
             letter-spacing: 1px; padding: 2px 8px;
             background: rgba(74,92,47,0.3); border-radius: 2px; color: var(--smoke);
         }
+        /* Checkbox foto no modal */
+        .foto-checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            margin-bottom: 16px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+            border-radius: 1px;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+        }
+        .foto-checkbox-label:hover { background: rgba(74,92,47,0.15); }
+        .foto-checkbox-label input[type="checkbox"] { display: none; }
+        .foto-checkbox-box {
+            width: 20px; height: 20px;
+            border: 2px solid var(--olive);
+            border-radius: 1px;
+            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+            background: transparent;
+        }
+        .foto-checkbox-label input:checked + .foto-checkbox-box {
+            background: var(--olive);
+            border-color: var(--neon);
+        }
+        .foto-checkbox-label input:checked + .foto-checkbox-box::after {
+            content: '✓';
+            color: var(--neon);
+            font-size: 13px;
+            font-weight: 700;
+            line-height: 1;
+        }
+        .foto-checkbox-text {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 13px;
+            color: var(--smoke);
+            letter-spacing: 1px;
+        }
+        .foto-checkbox-label:has(input:checked) .foto-checkbox-text { color: var(--neon); }
+
+        /* Camera badge na lista */
+        .nota-card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2px;
+        }
+        .camera-badge {
+            font-size: 18px;
+            line-height: 1;
+            filter: drop-shadow(0 0 4px rgba(127,255,0,0.4));
+        }
+
+        /* Linha loja + botão editar */
+        .nota-loja-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+        .btn-edit-loja {
+            background: none;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 1px;
+            opacity: 0.45;
+            transition: opacity 0.2s, background 0.2s;
+            letter-spacing: 0;
+            font-family: inherit;
+        }
+        .nota-card:hover .btn-edit-loja { opacity: 1; }
+        .btn-edit-loja:hover { background: rgba(74,92,47,0.3); opacity: 1; }
+
         .enter-hint {
             text-align: center;
             color: rgba(143,170,114,0.45);
@@ -738,11 +817,44 @@
                 </div>
             </div>
             <div id="modalBarcode" class="modal-barcode"></div>
+
+            <!-- Checkbox foto -->
+            <label class="foto-checkbox-label">
+                <input type="checkbox" id="checkFoto">
+                <span class="foto-checkbox-box"></span>
+                <span class="foto-checkbox-text">📷 Nota acompanha foto</span>
+            </label>
+
             <div class="modal-actions">
                 <button id="btnCancelar" class="btn-danger">✕ Cancelar</button>
                 <button id="btnConfirmar" class="btn-success">✓ Confirmar</button>
             </div>
             <div class="enter-hint">// pressione ENTER para confirmar</div>
+        </div>
+    </div>
+
+    <!-- Modal editar loja -->
+    <div id="modalEditarLoja" class="modal-confirmacao">
+        <div class="modal-content">
+            <div class="modal-header">✏️ EDITAR LOJA</div>
+            <div class="modal-info" style="margin-bottom:16px;">
+                <div class="modal-info-item">
+                    <span class="modal-info-label">NF</span>
+                    <span id="editModalNF" class="modal-info-value">-</span>
+                </div>
+                <div class="modal-info-item">
+                    <span class="modal-info-label">Colaborador</span>
+                    <span id="editModalColaborador" class="modal-info-value">-</span>
+                </div>
+            </div>
+            <div class="form-group" style="margin-bottom:18px;">
+                <label for="editInputLoja">🏪 Nova Loja</label>
+                <input type="text" id="editInputLoja" placeholder="Nome da loja" autocomplete="off">
+            </div>
+            <div class="modal-actions">
+                <button id="btnEditCancelar" class="btn-danger">✕ Cancelar</button>
+                <button id="btnEditSalvar" class="btn-success">✓ Salvar</button>
+            </div>
         </div>
     </div>
 
@@ -1153,6 +1265,7 @@
             <span class="${cls}">${codigo}</span><br>
             <span class="len-badge">${codigo.length} dígitos ${codigo.length === 44 ? '✓' : '⚠ esperado 44'}</span>
         `;
+        document.getElementById('checkFoto').checked = false;
         modalConfirmacao.classList.add('show');
         document.body.classList.add('modal-open');
         btnConfirmar.focus();
@@ -1168,7 +1281,8 @@
 
     function confirmarLeitura() {
         if (!codigoAtualConfirmacao) return;
-        processarCodigo(codigoAtualConfirmacao, temFotoAtual);
+        const comFoto = document.getElementById('checkFoto').checked;
+        processarCodigo(codigoAtualConfirmacao, comFoto);
         fecharModal();
     }
 
@@ -1199,6 +1313,45 @@
         btnLimpar.disabled = true;
     }
 
+    // ─── EDITAR LOJA ───────────────────────────────────────
+    let editandoId = null;
+
+    function abrirEditarLoja(id) {
+        const nota = notasFiscais.find(n => String(n.id) === String(id));
+        if (!nota) return;
+        editandoId = nota.id;
+        document.getElementById('editModalNF').textContent          = nota.numeroNF;
+        document.getElementById('editModalColaborador').textContent = nota.colaborador;
+        document.getElementById('editInputLoja').value             = nota.loja;
+        document.getElementById('modalEditarLoja').classList.add('show');
+        document.body.classList.add('modal-open');
+        document.getElementById('editInputLoja').focus();
+    }
+
+    function fecharEditarLoja() {
+        document.getElementById('modalEditarLoja').classList.remove('show');
+        document.body.classList.remove('modal-open');
+        editandoId = null;
+    }
+
+    function salvarEdicaoLoja() {
+        const novaLoja = document.getElementById('editInputLoja').value.trim();
+        if (!novaLoja) { mostrarFeedback('❌ Nome da loja não pode ser vazio', '#c0392b'); return; }
+        const idx = notasFiscais.findIndex(n => n.id === editandoId);
+        if (idx === -1) return;
+        notasFiscais[idx].loja = novaLoja;
+        atualizarLista();
+        salvarNoLocalStorage();
+        fecharEditarLoja();
+        mostrarFeedback('✓ Loja atualizada!', '#3a5c1f');
+    }
+
+    document.getElementById('btnEditCancelar').addEventListener('click', fecharEditarLoja);
+    document.getElementById('btnEditSalvar').addEventListener('click', salvarEdicaoLoja);
+    document.getElementById('editInputLoja').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); salvarEdicaoLoja(); }
+    });
+
     async function salvarNoBackend(nota) {
         try {
             const r = await fetch('http://localhost:3000/api/salvar-nota', {
@@ -1219,10 +1372,16 @@
         contador.textContent        = notasFiscais.length;
         listaNotas.innerHTML = notasFiscais.map(nota => `
             <div class="nota-card">
-                <div class="nota-colaborador">${nota.colaborador}</div>
-                <div class="nota-loja">${nota.loja}</div>
+                <div class="nota-card-top">
+                    <div class="nota-colaborador">${nota.colaborador}</div>
+                    ${nota.temFoto ? '<span class="camera-badge" title="Acompanha foto">📷</span>' : ''}
+                </div>
+                <div class="nota-loja-row">
+                    <span class="nota-loja">${nota.loja}</span>
+                    <button class="btn-edit-loja" onclick="abrirEditarLoja('${nota.id}')" title="Editar loja">✏️</button>
+                </div>
                 <div class="nota-numero">${nota.numeroNF}</div>
-                <div class="nota-data">${nota.dataHora}${nota.temFoto ? ' <span class="photo-icon">📸</span>' : ''}</div>
+                <div class="nota-data">${nota.dataHora}</div>
             </div>
         `).join('');
     }

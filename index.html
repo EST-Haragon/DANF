@@ -902,6 +902,9 @@
     let temFotoAtual            = false;
     let rafId                   = null;   // requestAnimationFrame do BarcodeDetector
     let zxingReader             = null;   // instância ZXing
+    let loopPausado             = false;  // true enquanto modal está aberto
+    let cooldownCodigo          = '';     // último código aceito (evita reler imediatamente)
+    let cooldownTimer           = null;   // timer que limpa o cooldown
 
     // ─── LEITOR FÍSICO ─────────────────────────────────────
     const MIN_LEN      = 20;
@@ -996,22 +999,47 @@
         }
     }
 
+    // Para TUDO e fecha a câmera (botão Fechar)
     function pararScanner() {
         scannerAtivo = false;
+        loopPausado  = false;
+        clearTimeout(cooldownTimer);
+        cooldownCodigo = '';
 
-        // Para loops de leitura
         if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
-        if (zxingReader) {
-            try { zxingReader.reset(); } catch(e) {}
-            zxingReader = null;
-        }
-
-        // Para stream da câmera
+        if (zxingReader) { try { zxingReader.reset(); } catch(e) {} zxingReader = null; }
         if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
 
         cameraContainer.style.display = 'none';
         btnEscanear.style.display     = 'flex';
         btnLeitorCodigo.style.display = 'flex';
+    }
+
+    // Pausa o loop (modal aberto) sem fechar câmera
+    function pausarLoop() {
+        loopPausado = true;
+        if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+        cameraHint.textContent = '⬡ AGUARDANDO CONFIRMAÇÃO...';
+    }
+
+    // Retoma o loop após fechar o modal, com cooldown para não reler o mesmo código
+    function retomarLoop(codigoLido) {
+        loopPausado    = true; // mantém pausado durante cooldown
+        cooldownCodigo = codigoLido;
+        cameraHint.textContent = '⬡ RECARREGANDO...';
+
+        clearTimeout(cooldownTimer);
+        cooldownTimer = setTimeout(() => {
+            if (!scannerAtivo) return;
+            cooldownCodigo = '';
+            loopPausado    = false;
+            cameraHint.textContent = '⬡ POSICIONE O PRÓXIMO CÓDIGO';
+            if (NATIVE_SUPPORTED) {
+                iniciarBarcodeDetectorNativo();
+            } else {
+                iniciarZXing();
+            }
+        }, 1500); // 1.5s de cooldown antes de aceitar novo código
     }
 
     // ═══════════════════════════════════════════════════════
@@ -1030,7 +1058,7 @@
         const MIN_VOTOS = 2; // BarcodeDetector é muito mais preciso; 2 já basta
 
         async function loop() {
-            if (!scannerAtivo) return;
+            if (!scannerAtivo || loopPausado) return;
 
             if (video.readyState === video.HAVE_ENOUGH_DATA) {
                 try {
@@ -1043,6 +1071,11 @@
                         const raw   = melhor.rawValue;
                         const limpo = raw.replace(/\D/g, '');
 
+                        // Ignora se ainda está no cooldown do código anterior
+                        if (limpo === cooldownCodigo) {
+                            rafId = requestAnimationFrame(loop); return;
+                        }
+
                         if (limpo.length >= MIN_LEN) {
                             if (limpo === ultimoCodigo) {
                                 contagemVotos++;
@@ -1054,7 +1087,7 @@
                             cameraHint.textContent = `⬡ ${limpo.length} DÍGITOS · ${contagemVotos}/${MIN_VOTOS}`;
 
                             if (contagemVotos >= MIN_VOTOS) {
-                                pararScanner();
+                                pausarLoop();
                                 mostrarModalConfirmacao(limpo, true);
                                 return;
                             }
@@ -1108,7 +1141,7 @@
         const MIN_VOTOS   = 3;
 
         function loop() {
-            if (!scannerAtivo) return;
+            if (!scannerAtivo || loopPausado) return;
 
             if (video.readyState === video.HAVE_ENOUGH_DATA) {
                 canvas.width  = video.videoWidth;
@@ -1124,6 +1157,9 @@
                     const raw        = result.getText();
                     const limpo      = raw.replace(/\D/g, '');
 
+                    // Ignora se ainda está no cooldown do código anterior
+                    if (limpo === cooldownCodigo) { rafId = requestAnimationFrame(loop); return; }
+
                     if (limpo.length >= MIN_LEN) {
                         if (limpo === ultimoCodigo) {
                             contagemVotos++;
@@ -1135,7 +1171,7 @@
                         cameraHint.textContent = `⬡ ${limpo.length} DÍGITOS · ${contagemVotos}/${MIN_VOTOS}`;
 
                         if (contagemVotos >= MIN_VOTOS) {
-                            pararScanner();
+                            pausarLoop();
                             mostrarModalConfirmacao(limpo, true);
                             return;
                         }
@@ -1272,11 +1308,17 @@
     }
 
     function fecharModal() {
+        const codigoLido = codigoAtualConfirmacao;
         modalConfirmacao.classList.remove('show');
         document.body.classList.remove('modal-open');
         codigoAtualConfirmacao = null;
         temFotoAtual           = false;
-        if (modoLeitor) barcodeInput.focus();
+        if (modoLeitor) {
+            barcodeInput.focus();
+        } else if (scannerAtivo) {
+            // Câmera estava ativa: retoma com cooldown
+            retomarLoop(codigoLido || '');
+        }
     }
 
     function confirmarLeitura() {

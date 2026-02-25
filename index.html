@@ -1242,6 +1242,11 @@
     // Fallback input event
     barcodeInput.addEventListener('input', function(e) {
         if (!modoLeitor) return;
+        // 🔧 CORREÇÃO: ignora se o modal ainda está aberto (evita reler código anterior)
+        if (modalConfirmacao.classList.contains('show')) {
+            e.target.value = '';
+            return;
+        }
         const val = e.target.value.replace(/\D/g, '');
         if (val.length > bufferLeitor.length) {
             bufferLeitor = val;
@@ -1314,7 +1319,14 @@
         codigoAtualConfirmacao = null;
         temFotoAtual           = false;
         if (modoLeitor) {
-            barcodeInput.focus();
+            // 🔧 CORREÇÃO: limpa buffer e campos antes de restaurar foco
+            bufferLeitor               = '';
+            barcodeInput.value         = '';
+            barcodeDisplay.value       = '';
+            barcodeDisplay.placeholder = '// AGUARDANDO CÓDIGO //';
+            clearTimeout(timerLeitor);
+            // Pequeno delay para garantir que o modal fechou completamente
+            setTimeout(() => barcodeInput.focus(), 50);
         } else if (scannerAtivo) {
             // Câmera estava ativa: retoma com cooldown
             retomarLoop(codigoLido || '');

@@ -1,1517 +1,1281 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QGK – Scanner DANFE</title>
-    <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --olive: #4a5c2f;
-            --military: #2e3d1a;
-            --dark: #101508;
-            --neon: #7fff00;
-            --smoke: #8faa72;
-            --card-bg: #161f0c;
-            --border: rgba(74,92,47,0.45);
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        html { overflow-y: scroll; overflow-x: hidden; }
-
-        body {
-            font-family: 'Rajdhani', sans-serif;
-            background-color: var(--dark);
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cellipse cx='40' cy='28' rx='42' ry='24' fill='%234a5c2f' opacity='0.13'/%3E%3Cellipse cx='140' cy='70' rx='58' ry='28' fill='%232e3d1a' opacity='0.15'/%3E%3Cellipse cx='220' cy='32' rx='44' ry='22' fill='%233d4f1e' opacity='0.1'/%3E%3Cellipse cx='70' cy='150' rx='64' ry='30' fill='%234a5c2f' opacity='0.12'/%3E%3Cellipse cx='195' cy='135' rx='50' ry='28' fill='%232e3d1a' opacity='0.13'/%3E%3Cellipse cx='42' cy='218' rx='55' ry='26' fill='%233d4f1e' opacity='0.11'/%3E%3Cellipse cx='180' cy='225' rx='65' ry='30' fill='%234a5c2f' opacity='0.13'/%3E%3C/svg%3E");
-            min-height: 100vh;
-            padding: 20px;
-            overflow-x: hidden;
-        }
-
-        body.modal-open { overflow: hidden; padding-right: 0; }
-
-        /* ── CONTAINER ── */
-        .container {
-            max-width: 420px;
-            margin: 0 auto;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 2px;
-            padding: 24px;
-            box-shadow: 0 24px 64px rgba(0,0,0,0.75), 0 0 0 1px rgba(127,255,0,0.04);
-            position: relative;
-        }
-
-        /* corner brackets */
-        .container::before, .container::after {
-            content: '';
-            position: absolute;
-            width: 18px; height: 18px;
-            border-color: var(--neon);
-            border-style: solid;
-            opacity: 0.35;
-        }
-        .container::before { top: 7px; left: 7px; border-width: 2px 0 0 2px; }
-        .container::after  { bottom: 7px; right: 7px; border-width: 0 2px 2px 0; }
-
-        /* ── LOGO HEADER ── */
-        .logo-header {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 14px;
-            margin-bottom: 28px;
-        }
-
-        .logo-hex {
-            width: 48px;
-            height: 48px;
-            flex-shrink: 0;
-        }
-
-        .logo-text-block {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            line-height: 1;
-        }
-
-        .logo-qgk {
-            font-family: 'Black Ops One', cursive;
-            font-size: 26px;
-            letter-spacing: 5px;
-            color: var(--neon);
-            text-shadow: 0 0 16px rgba(127,255,0,0.35);
-        }
-
-        .logo-sub {
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 10px;
-            letter-spacing: 3px;
-            color: var(--smoke);
-            text-transform: uppercase;
-            margin-top: 2px;
-        }
-
-        /* ── DIVIDER ── */
-        .divider {
-            width: 100%;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--olive), transparent);
-            margin-bottom: 20px;
-        }
-
-        /* ── FORM ── */
-        .form-group { margin-bottom: 14px; }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 600;
-            color: var(--smoke);
-            font-size: 11px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            font-family: 'Share Tech Mono', monospace;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 11px 14px;
-            border: 1px solid var(--border);
-            border-radius: 1px;
-            font-size: 15px;
-            font-family: 'Rajdhani', sans-serif;
-            font-weight: 600;
-            background: rgba(0,0,0,0.45);
-            color: #d4e8b0;
-            transition: all 0.25s;
-        }
-
-        .form-group input::placeholder { color: rgba(143,170,114,0.3); }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--olive);
-            box-shadow: 0 0 0 2px rgba(74,92,47,0.2), 0 0 10px rgba(127,255,0,0.08);
-            background: rgba(0,0,0,0.6);
-        }
-
-        /* ── BUTTONS ── */
-        button {
-            font-family: 'Black Ops One', cursive;
-            cursor: pointer;
-            border: none;
-            border-radius: 1px;
-            font-weight: 400;
-            letter-spacing: 2px;
-            transition: all 0.22s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            text-transform: uppercase;
-        }
-
-        .btn-primary {
-            width: 100%;
-            padding: 13px;
-            background: var(--olive);
-            color: var(--neon);
-            font-size: 13px;
-            margin-bottom: 8px;
-            border: 1px solid rgba(127,255,0,0.18);
-            clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
-        }
-        .btn-primary:hover:not(:disabled) {
-            background: #5a7038;
-            box-shadow: 0 0 18px rgba(127,255,0,0.18);
-            transform: translateY(-1px);
-        }
-        .btn-primary:disabled {
-            background: #222;
-            color: #444;
-            border-color: #333;
-            cursor: not-allowed;
-            clip-path: none;
-        }
-
-        .btn-secondary {
-            width: 100%;
-            padding: 11px;
-            background: transparent;
-            color: var(--smoke);
-            font-size: 12px;
-            margin-bottom: 8px;
-            border: 1px solid var(--border);
-            clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
-        }
-        .btn-secondary:hover:not(:disabled) {
-            border-color: var(--olive);
-            color: #d4e8b0;
-            background: rgba(74,92,47,0.15);
-        }
-        .btn-secondary:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-            clip-path: none;
-        }
-
-        .btn-danger {
-            width: 100%;
-            padding: 11px;
-            background: rgba(192,57,43,0.12);
-            color: #e05a4a;
-            font-size: 12px;
-            border: 1px solid rgba(192,57,43,0.35);
-            clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
-        }
-        .btn-danger:hover:not(:disabled) {
-            background: rgba(192,57,43,0.25);
-            transform: translateY(-1px);
-        }
-        .btn-danger:disabled {
-            opacity: 0.25;
-            cursor: not-allowed;
-            clip-path: none;
-        }
-
-        .btn-success {
-            width: 100%;
-            padding: 11px;
-            background: rgba(74,92,47,0.28);
-            color: var(--neon);
-            font-size: 12px;
-            margin-bottom: 8px;
-            border: 1px solid rgba(127,255,0,0.2);
-            clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
-        }
-        .btn-success:hover:not(:disabled) {
-            background: rgba(74,92,47,0.45);
-            box-shadow: 0 0 14px rgba(127,255,0,0.12);
-            transform: translateY(-1px);
-        }
-        .btn-success:disabled {
-            opacity: 0.25;
-            cursor: not-allowed;
-            clip-path: none;
-        }
-
-        .btn-close-camera {
-            width: 100%;
-            padding: 9px;
-            margin-top: 8px;
-            background: rgba(0,0,0,0.4);
-            color: var(--smoke);
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 11px;
-            letter-spacing: 2px;
-            border: 1px solid rgba(143,170,114,0.2);
-            border-radius: 1px;
-        }
-        .btn-close-camera:hover {
-            border-color: rgba(192,57,43,0.5);
-            color: #e05a4a;
-            background: rgba(192,57,43,0.08);
-        }
-
-        .action-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-top: 16px;
-            padding-top: 16px;
-            border-top: 1px solid var(--border);
-        }
-
-        .button-group {
-            display: flex;
-            gap: 8px;
-            width: 100%;
-            margin-bottom: 0;
-        }
-        .button-group button { flex: 1; margin: 0; font-size: 11px; }
-
-        /* ── CAMERA ── */
-        .camera-container {
-            margin-bottom: 14px;
-            position: relative;
-        }
-
-        #video {
-            width: 100%;
-            border-radius: 1px;
-            border: 2px solid var(--olive);
-            display: block;
-            background: #000;
-        }
-
-        .camera-overlay {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 90%; height: 40%;
-            border: 2px solid var(--neon);
-            border-radius: 1px;
-            box-shadow: 0 0 0 9999px rgba(0,0,0,0.55);
-            pointer-events: none;
-        }
-        .camera-overlay::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 2px;
-            background: var(--neon);
-            animation: scan 2s linear infinite;
-            box-shadow: 0 0 10px var(--neon);
-        }
-        @keyframes scan {
-            0%, 100% { top: 0; }
-            50% { top: 100%; }
-        }
-
-        .camera-hint {
-            position: absolute;
-            bottom: 44px; left: 0; right: 0;
-            text-align: center;
-            color: var(--neon);
-            font-size: 10px;
-            font-family: 'Share Tech Mono', monospace;
-            letter-spacing: 2px;
-            padding: 5px;
-            background: rgba(0,0,0,0.55);
-        }
-
-        /* ── NOTAS SECTION ── */
-        .notas-section { margin-top: 24px; }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 14px;
-        }
-
-        .section-header h2 {
-            font-family: 'Black Ops One', cursive;
-            font-size: 13px;
-            font-weight: 400;
-            color: var(--smoke);
-            letter-spacing: 3px;
-        }
-
-        .contador {
-            background: var(--olive);
-            color: var(--neon);
-            padding: 4px 14px;
-            font-family: 'Black Ops One', cursive;
-            font-size: 13px;
-            letter-spacing: 2px;
-            clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
-        }
-
-        .lista-notas {
-            max-height: 380px;
-            overflow-y: auto;
-            padding-right: 4px;
-        }
-
-        .lista-notas::-webkit-scrollbar { width: 4px; }
-        .lista-notas::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
-        .lista-notas::-webkit-scrollbar-thumb { background: var(--olive); }
-        .lista-notas::-webkit-scrollbar-thumb:hover { background: var(--neon); }
-
-        .nota-card {
-            background: rgba(0,0,0,0.3);
-            border: 1px solid var(--border);
-            border-left: 3px solid var(--olive);
-            border-radius: 1px;
-            padding: 10px 14px;
-            margin-bottom: 8px;
-            transition: all 0.25s;
-        }
-        .nota-card:hover {
-            border-left-color: var(--neon);
-            background: rgba(74,92,47,0.1);
-            transform: translateX(2px);
-        }
-
-        .nota-colaborador {
-            font-family: 'Black Ops One', cursive;
-            font-weight: 400;
-            color: #d4e8b0;
-            font-size: 15px;
-            letter-spacing: 1px;
-            margin-bottom: 2px;
-        }
-
-        .nota-loja {
-            color: var(--neon);
-            font-weight: 700;
-            font-size: 12px;
-            margin-bottom: 4px;
-            letter-spacing: 1px;
-        }
-
-        .nota-numero {
-            color: var(--smoke);
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 2px;
-            font-family: 'Share Tech Mono', monospace;
-        }
-
-        .nota-data {
-            color: rgba(143,170,114,0.55);
-            font-size: 11px;
-            font-family: 'Share Tech Mono', monospace;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .photo-icon { font-size: 12px; }
-
-        .empty-state {
-            text-align: center;
-            color: rgba(143,170,114,0.3);
-            padding: 40px 20px;
-            font-style: italic;
-            font-size: 14px;
-            letter-spacing: 1px;
-            font-family: 'Share Tech Mono', monospace;
-        }
-
-        /* ── FEEDBACK ── */
-        .feedback {
-            display: none;
-            padding: 12px 16px;
-            border-radius: 1px;
-            margin-bottom: 14px;
-            color: #000;
-            font-weight: 700;
-            text-align: center;
-            font-size: 14px;
-            letter-spacing: 1px;
-            font-family: 'Share Tech Mono', monospace;
-            animation: slideDown 0.3s ease;
-            clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
-        }
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-8px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-
-        /* ── MODAL ── */
-        .modal-confirmacao {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.82);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            backdrop-filter: blur(6px);
-        }
-        .modal-confirmacao.show { display: flex; }
-
-        .modal-content {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 2px;
-            padding: 28px;
-            max-width: 400px;
-            width: 100%;
-            box-shadow: 0 30px 70px rgba(0,0,0,0.8), 0 0 0 1px rgba(127,255,0,0.06);
-            animation: modalUp 0.28s ease;
-            position: relative;
-        }
-        .modal-content::before, .modal-content::after {
-            content: '';
-            position: absolute;
-            width: 14px; height: 14px;
-            border-color: var(--neon);
-            border-style: solid;
-            opacity: 0.4;
-        }
-        .modal-content::before { top: 6px; left: 6px; border-width: 2px 0 0 2px; }
-        .modal-content::after  { bottom: 6px; right: 6px; border-width: 0 2px 2px 0; }
-
-        @keyframes modalUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-
-        .modal-header {
-            font-family: 'Black Ops One', cursive;
-            font-size: 16px;
-            font-weight: 400;
-            color: var(--neon);
-            letter-spacing: 3px;
-            margin-bottom: 20px;
-            text-align: center;
-            text-shadow: 0 0 12px rgba(127,255,0,0.3);
-        }
-
-        .modal-info {
-            background: rgba(0,0,0,0.4);
-            border: 1px solid var(--border);
-            padding: 14px;
-            border-radius: 1px;
-            margin-bottom: 16px;
-        }
-
-        .modal-info-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-        .modal-info-item:last-child { margin-bottom: 0; }
-
-        .modal-info-label {
-            color: var(--smoke);
-            font-weight: 600;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 11px;
-            letter-spacing: 1px;
-        }
-
-        .modal-info-value {
-            color: #d4e8b0;
-            font-weight: 700;
-            font-size: 14px;
-        }
-
-        .modal-barcode {
-            background: rgba(0,0,0,0.5);
-            border: 1px dashed rgba(74,92,47,0.5);
-            padding: 10px;
-            border-radius: 1px;
-            text-align: center;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 11px;
-            color: var(--smoke);
-            word-break: break-all;
-            margin-bottom: 18px;
-            letter-spacing: 1px;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 10px;
-        }
-        .modal-actions button { flex: 1; padding: 13px; font-size: 13px; }
-
-        /* ── BARCODE READER ── */
-        .barcode-input-container {
-            display: none;
-            margin-bottom: 14px;
-        }
-        .barcode-input-container.show { display: block; }
-
-        .barcode-display {
-            width: 100%;
-            padding: 12px 14px;
-            border: 2px solid var(--olive);
-            border-radius: 1px;
-            font-size: 15px;
-            font-weight: 700;
-            text-align: center;
-            background: rgba(0,0,0,0.5);
-            color: var(--neon);
-            font-family: 'Share Tech Mono', monospace;
-            margin-bottom: 10px;
-            letter-spacing: 2px;
-        }
-
-        .barcode-hint {
-            text-align: center;
-            color: var(--smoke);
-            font-size: 11px;
-            font-family: 'Share Tech Mono', monospace;
-            letter-spacing: 2px;
-            padding: 10px;
-            background: rgba(74,92,47,0.12);
-            border: 1px solid var(--border);
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .hidden-barcode-input {
-            position: absolute;
-            left: -9999px;
-            width: 1px; height: 1px;
-        }
-
-
-        /* Destaque dos dígitos no modal */
-        .modal-barcode .digitos-ok    { color: var(--neon); font-size: 12px; }
-        .modal-barcode .digitos-alerta{ color: #f0c040; font-size: 12px; }
-        .modal-barcode .len-badge {
-            display: inline-block; margin-top: 6px; font-size: 10px;
-            letter-spacing: 1px; padding: 2px 8px;
-            background: rgba(74,92,47,0.3); border-radius: 2px; color: var(--smoke);
-        }
-
-        /* Engine badge */
-        .engine-badge {
-            display: inline-block;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 10px;
-            letter-spacing: 2px;
-            padding: 4px 12px;
-            border-radius: 1px;
-            margin-bottom: 10px;
-            width: 100%;
-            text-align: center;
-        }
-        .engine-badge.native   { background: rgba(127,255,0,0.1); color: var(--neon); border: 1px solid rgba(127,255,0,0.3); }
-        .engine-badge.fallback { background: rgba(240,192,64,0.1); color: #f0c040; border: 1px solid rgba(240,192,64,0.3); }
-
-        /* Destaque dos dígitos no modal */
-        .modal-barcode .digitos-ok    { color: var(--neon); font-size: 12px; }
-        .modal-barcode .digitos-alerta{ color: #f0c040; font-size: 12px; }
-        .modal-barcode .len-badge {
-            display: inline-block; margin-top: 6px; font-size: 10px;
-            letter-spacing: 1px; padding: 2px 8px;
-            background: rgba(74,92,47,0.3); border-radius: 2px; color: var(--smoke);
-        }
-        /* Checkbox foto no modal */
-        .foto-checkbox-label {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 14px;
-            margin-bottom: 16px;
-            background: rgba(0,0,0,0.3);
-            border: 1px solid var(--border);
-            border-radius: 1px;
-            cursor: pointer;
-            user-select: none;
-            transition: background 0.2s;
-        }
-        .foto-checkbox-label:hover { background: rgba(74,92,47,0.15); }
-        .foto-checkbox-label input[type="checkbox"] { display: none; }
-        .foto-checkbox-box {
-            width: 20px; height: 20px;
-            border: 2px solid var(--olive);
-            border-radius: 1px;
-            flex-shrink: 0;
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.2s;
-            background: transparent;
-        }
-        .foto-checkbox-label input:checked + .foto-checkbox-box {
-            background: var(--olive);
-            border-color: var(--neon);
-        }
-        .foto-checkbox-label input:checked + .foto-checkbox-box::after {
-            content: '✓';
-            color: var(--neon);
-            font-size: 13px;
-            font-weight: 700;
-            line-height: 1;
-        }
-        .foto-checkbox-text {
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 13px;
-            color: var(--smoke);
-            letter-spacing: 1px;
-        }
-        .foto-checkbox-label:has(input:checked) .foto-checkbox-text { color: var(--neon); }
-
-        /* Camera badge na lista */
-        .nota-card-top {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 2px;
-        }
-        .camera-badge {
-            font-size: 18px;
-            line-height: 1;
-            filter: drop-shadow(0 0 4px rgba(127,255,0,0.4));
-        }
-
-        /* Linha loja + botão editar */
-        .nota-loja-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 4px;
-        }
-        .btn-edit-loja {
-            background: none;
-            border: none;
-            font-size: 14px;
-            cursor: pointer;
-            padding: 2px 6px;
-            border-radius: 1px;
-            opacity: 0.45;
-            transition: opacity 0.2s, background 0.2s;
-            letter-spacing: 0;
-            font-family: inherit;
-        }
-        .nota-card:hover .btn-edit-loja { opacity: 1; }
-        .btn-edit-loja:hover { background: rgba(74,92,47,0.3); opacity: 1; }
-
-        .enter-hint {
-            text-align: center;
-            color: rgba(143,170,114,0.45);
-            font-size: 11px;
-            margin-top: 12px;
-            font-family: 'Share Tech Mono', monospace;
-            letter-spacing: 1px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QGK – PackScan 2.0</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d0f0a;
+  --bg2: #131508;
+  --surface: #1a1d12;
+  --surface2: #21251a;
+  --border: #2a2f1e;
+  --border2: #363c28;
+  --text: #e8ecd8;
+  --text2: #8fa070;
+  --text3: #4a5535;
+  --neon: #a8ff3e;
+  --neon2: #7dc423;
+  --neon-dim: rgba(168,255,62,0.12);
+  --red: #ff4d4d;
+  --red-bg: rgba(255,77,77,0.1);
+  --yellow: #ffd84d;
+  --yellow-bg: rgba(255,216,77,0.1);
+  --blue: #4daaff;
+  --blue-bg: rgba(77,170,255,0.1);
+  --orange: #ff8c42;
+  --orange-bg: rgba(255,140,66,0.1);
+  --radius: 10px;
+  --shadow: 0 2px 12px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.6);
+  --glow: 0 0 20px rgba(168,255,62,0.15);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{overflow-y:scroll;overflow-x:hidden;}
+body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:16px;}
+body.modal-open{overflow:hidden;}
+
+/* ── SCANLINES texture ── */
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);pointer-events:none;z-index:9999;}
+
+.container{max-width:460px;margin:0 auto;}
+
+/* ── LOGIN ── */
+.login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9000;padding:20px;}
+.login-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px 32px;width:100%;max-width:380px;box-shadow:var(--shadow-lg),var(--glow);}
+.login-logo{text-align:center;margin-bottom:32px;}
+.login-hex{display:inline-block;margin-bottom:12px;}
+.login-title{font-family:'Black Ops One',cursive;font-size:28px;letter-spacing:6px;color:var(--neon);text-shadow:0 0 20px rgba(168,255,62,0.4);}
+.login-sub{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--text3);text-transform:uppercase;margin-top:4px;}
+.login-field{margin-bottom:14px;}
+.login-field label{display:block;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;font-family:'Space Mono',monospace;}
+.login-field input{width:100%;padding:12px 16px;border:1px solid var(--border2);border-radius:8px;font-size:14px;font-family:'Space Grotesk',sans-serif;background:var(--surface2);color:var(--text);outline:none;transition:all 0.2s;}
+.login-field input:focus{border-color:var(--neon);box-shadow:0 0 0 3px rgba(168,255,62,0.08);}
+.login-btn{width:100%;padding:13px;background:var(--neon);color:#0d0f0a;border:none;border-radius:10px;font-size:14px;font-weight:700;font-family:'Space Grotesk',sans-serif;cursor:pointer;margin-top:8px;transition:all 0.18s;letter-spacing:0.5px;}
+.login-btn:hover{background:var(--neon2);transform:translateY(-1px);box-shadow:0 4px 20px rgba(168,255,62,0.3);}
+.login-btn:disabled{background:var(--border2);color:var(--text3);cursor:not-allowed;transform:none;}
+.login-error{background:var(--red-bg);color:var(--red);border:1px solid rgba(255,77,77,0.3);border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:14px;display:none;font-weight:500;}
+
+/* ── APP HEADER ── */
+.app-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);}
+.app-logo-hex{flex-shrink:0;}
+.app-title{font-family:'Black Ops One',cursive;font-size:20px;letter-spacing:4px;color:var(--neon);}
+.app-sub{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;margin-top:2px;}
+.btn-logout{margin-left:auto;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:6px 12px;font-size:11px;color:var(--text2);cursor:pointer;font-family:'Space Grotesk',sans-serif;transition:all 0.15s;}
+.btn-logout:hover{border-color:var(--red);color:var(--red);}
+
+/* ── FORM ── */
+.form-group{margin-bottom:12px;}
+.form-group label{display:block;margin-bottom:5px;font-weight:700;color:var(--text3);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;font-family:'Space Mono',monospace;}
+.form-group input{width:100%;padding:11px 14px;border:1px solid var(--border2);border-radius:8px;font-size:14px;font-family:'Space Grotesk',sans-serif;font-weight:500;background:var(--surface2);color:var(--text);transition:all 0.2s;}
+.form-group input:focus{outline:none;border-color:var(--neon);box-shadow:0 0 0 3px rgba(168,255,62,0.08);}
+.form-group input:read-only{opacity:0.6;cursor:default;}
+
+/* ── LOJA SELECTOR ── */
+.loja-selector{display:flex;flex-direction:column;gap:5px;max-height:180px;overflow-y:auto;padding:2px 0;}
+.loja-option{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--border2);border-radius:8px;cursor:pointer;transition:all 0.15s;background:var(--surface2);}
+.loja-option:hover{border-color:var(--neon);background:var(--neon-dim);}
+.loja-option.selected{background:var(--neon);border-color:var(--neon);}
+.loja-option input[type="radio"]{display:none;}
+.loja-radio-box{width:16px;height:16px;border:2px solid var(--border2);border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.15s;background:var(--bg2);}
+.loja-option.selected .loja-radio-box{border-color:#0d0f0a;}
+.loja-option.selected .loja-radio-box::after{content:'';width:7px;height:7px;background:#0d0f0a;border-radius:50%;}
+.loja-option-name{font-size:13px;font-weight:600;}
+.loja-option.selected .loja-option-name{color:#0d0f0a;}
+.plat-badge{font-size:9px;font-family:'Space Mono',monospace;padding:2px 6px;border-radius:4px;margin-left:auto;font-weight:700;}
+.plat-shopee{background:rgba(238,77,45,0.2);color:#ee4d2d;}
+.plat-mercadolivre{background:rgba(255,230,0,0.2);color:#e6b800;}
+.loja-option.selected .plat-badge{background:rgba(0,0,0,0.15);color:#0d0f0a;}
+
+/* ── BUTTONS ── */
+button{font-family:'Space Grotesk',sans-serif;cursor:pointer;border:none;border-radius:8px;font-weight:600;transition:all 0.18s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-primary{width:100%;padding:12px;background:var(--neon);color:#0d0f0a;font-size:14px;margin-bottom:8px;}
+.btn-primary:hover:not(:disabled){background:var(--neon2);transform:translateY(-1px);box-shadow:0 4px 16px rgba(168,255,62,0.25);}
+.btn-primary:disabled{background:var(--border2);color:var(--text3);cursor:not-allowed;}
+.btn-secondary{width:100%;padding:11px;background:var(--surface2);color:var(--text2);font-size:13px;margin-bottom:8px;border:1px solid var(--border2);}
+.btn-secondary:hover:not(:disabled){background:var(--border2);color:var(--text);}
+.btn-danger{width:100%;padding:11px;background:var(--red-bg);color:var(--red);font-size:13px;border:1px solid rgba(255,77,77,0.3);}
+.btn-danger:hover:not(:disabled){background:rgba(255,77,77,0.18);}
+.btn-success{width:100%;padding:11px;background:rgba(168,255,62,0.12);color:var(--neon);font-size:13px;margin-bottom:8px;border:1px solid rgba(168,255,62,0.25);}
+.btn-success:hover:not(:disabled){background:rgba(168,255,62,0.2);}
+.btn-close{width:100%;padding:9px;margin-top:8px;background:var(--surface2);color:var(--text2);font-size:12px;border:1px solid var(--border2);border-radius:8px;}
+.btn-close:hover{background:var(--red-bg);color:var(--red);border-color:rgba(255,77,77,0.3);}
+
+/* ── CAMERA ── */
+.camera-container{margin-bottom:12px;position:relative;display:none;}
+#video{width:100%;border-radius:8px;border:1px solid var(--border2);display:block;background:#000;}
+.camera-overlay{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:88%;height:38%;border:2px solid var(--neon);border-radius:4px;box-shadow:0 0 0 9999px rgba(0,0,0,0.5),0 0 20px rgba(168,255,62,0.3);pointer-events:none;}
+.camera-overlay::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--neon),transparent);animation:scan 2s linear infinite;}
+@keyframes scan{0%,100%{top:0}50%{top:100%}}
+.camera-hint{position:absolute;bottom:44px;left:0;right:0;text-align:center;color:var(--neon);font-size:10px;font-family:'Space Mono',monospace;letter-spacing:1px;padding:5px;background:rgba(0,0,0,0.65);}
+.engine-badge{display:inline-block;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;padding:5px 12px;border-radius:20px;margin-bottom:10px;width:100%;text-align:center;font-weight:500;}
+.engine-badge.native{background:rgba(168,255,62,0.1);color:var(--neon);border:1px solid rgba(168,255,62,0.25);}
+.engine-badge.fallback{background:var(--yellow-bg);color:var(--yellow);border:1px solid rgba(255,216,77,0.25);}
+
+/* ── BARCODE LEITOR ── */
+.barcode-input-container{display:none;margin-bottom:12px;}
+.barcode-input-container.show{display:block;}
+.barcode-display{width:100%;padding:12px 14px;border:2px solid var(--neon);border-radius:8px;font-size:15px;font-weight:700;text-align:center;background:var(--surface2);color:var(--neon);font-family:'Space Mono',monospace;margin-bottom:10px;letter-spacing:2px;}
+.barcode-hint{text-align:center;color:var(--text2);font-size:10px;font-family:'Space Mono',monospace;letter-spacing:1px;padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.hidden-barcode-input{position:absolute;left:-9999px;width:1px;height:1px;}
+
+/* ── FEEDBACK ── */
+.feedback{display:none;padding:11px 16px;border-radius:8px;margin-bottom:12px;font-weight:600;text-align:center;font-size:13px;animation:slideDown 0.3s ease;}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── MODAL BASE ── */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px);}
+.modal.show{display:flex;}
+.modal-box{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:24px;max-width:420px;width:100%;box-shadow:var(--shadow-lg);animation:modalUp 0.25s ease;}
+@keyframes modalUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.modal-title{font-family:'Black Ops One',cursive;font-size:16px;letter-spacing:2px;color:var(--neon);margin-bottom:16px;text-align:center;}
+.modal-actions{display:flex;gap:10px;margin-top:16px;}
+.modal-actions button{flex:1;padding:12px;font-size:13px;}
+
+/* ── MODAL PEDIDO — card de resultado do scan ── */
+.pedido-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px;}
+.pedido-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;gap:10px;}
+.pedido-plataforma{font-size:10px;font-family:'Space Mono',monospace;padding:3px 8px;border-radius:4px;font-weight:700;flex-shrink:0;}
+.pedido-status-badge{font-size:11px;padding:4px 10px;border-radius:20px;font-weight:600;flex-shrink:0;}
+.status-normal{background:rgba(168,255,62,0.12);color:var(--neon);border:1px solid rgba(168,255,62,0.2);}
+.status-cancelado{background:var(--red-bg);color:var(--red);border:1px solid rgba(255,77,77,0.2);}
+.status-devolucao{background:var(--yellow-bg);color:var(--yellow);border:1px solid rgba(255,216,77,0.2);}
+.pedido-nf{font-family:'Space Mono',monospace;font-size:11px;color:var(--text3);margin-bottom:4px;}
+.pedido-pedido{font-family:'Black Ops One',cursive;font-size:18px;letter-spacing:2px;color:var(--text);margin-bottom:2px;}
+.pedido-cliente{font-size:14px;font-weight:600;color:var(--neon);margin-bottom:10px;}
+.pedido-divider{height:1px;background:var(--border);margin:10px 0;}
+.pedido-itens-title{font-size:10px;font-family:'Space Mono',monospace;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+.pedido-itens{font-size:13px;color:var(--text2);line-height:1.6;}
+.item-linha{display:flex;align-items:flex-start;gap:6px;margin-bottom:4px;}
+.item-bullet{color:var(--neon);flex-shrink:0;font-size:10px;margin-top:3px;}
+.pedido-valor{font-family:'Space Mono',monospace;font-size:12px;color:var(--text3);margin-top:8px;}
+.alerta-cancelado{background:var(--red-bg);border:1px solid rgba(255,77,77,0.3);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--red);font-weight:600;margin-bottom:12px;text-align:center;}
+.alerta-ja-preparado{background:var(--yellow-bg);border:1px solid rgba(255,216,77,0.3);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--yellow);margin-bottom:12px;font-family:'Space Mono',monospace;}
+
+/* ── FOTO CHECKBOX ── */
+.foto-checkbox-label{display:flex;align-items:center;gap:12px;padding:11px 14px;margin-bottom:12px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;cursor:pointer;user-select:none;transition:all 0.15s;}
+.foto-checkbox-label:hover{border-color:var(--neon);}
+.foto-checkbox-label input[type="checkbox"]{display:none;}
+.foto-checkbox-box{width:20px;height:20px;border:2px solid var(--border2);border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+.foto-checkbox-label input:checked + .foto-checkbox-box{background:var(--neon);border-color:var(--neon);}
+.foto-checkbox-label input:checked + .foto-checkbox-box::after{content:'✓';color:#0d0f0a;font-size:13px;font-weight:700;line-height:1;}
+.foto-checkbox-text{font-size:13px;color:var(--text2);font-weight:500;}
+
+/* ── DEVOLUÇÕES INPUT ── */
+.devolucao-input{width:100%;padding:10px 14px;border:1px solid var(--border2);border-radius:8px;font-size:13px;font-family:'Space Grotesk',sans-serif;background:var(--surface2);color:var(--text);outline:none;transition:all 0.2s;resize:vertical;min-height:70px;margin-bottom:12px;}
+.devolucao-input:focus{border-color:var(--yellow);box-shadow:0 0 0 3px rgba(255,216,77,0.08);}
+
+/* ── LISTA KITS ── */
+.kits-section{margin-top:20px;}
+.section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.section-header h2{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;}
+.contador{background:var(--neon);color:#0d0f0a;padding:3px 12px;font-size:11px;font-weight:700;border-radius:20px;font-family:'Space Mono',monospace;}
+.lista-kits{max-height:340px;overflow-y:auto;padding-right:2px;}
+.lista-kits::-webkit-scrollbar{width:3px;}
+.lista-kits::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+.kit-card{background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--neon);border-radius:8px;padding:10px 14px;margin-bottom:7px;transition:all 0.2s;}
+.kit-card:hover{border-left-color:var(--blue);transform:translateX(2px);}
+.kit-card.devolucao{border-left-color:var(--yellow);}
+.kit-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;}
+.kit-collab{font-weight:600;color:var(--text);font-size:13px;}
+.kit-numero{color:var(--neon);font-weight:700;font-size:12px;font-family:'Space Mono',monospace;}
+.kit-cliente{color:var(--text2);font-size:12px;margin-bottom:2px;}
+.kit-data{color:var(--text3);font-size:10px;font-family:'Space Mono',monospace;}
+.kit-foto-badge{font-size:13px;}
+.empty-state{text-align:center;color:var(--text3);padding:32px 20px;font-size:12px;font-family:'Space Mono',monospace;}
+.action-buttons{display:flex;flex-direction:column;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
+.button-group{display:flex;gap:8px;width:100%;}
+.button-group button{flex:1;margin:0;font-size:12px;}
+
+/* ── MODAL OBS (devolução) ── */
+.enter-hint{text-align:center;color:var(--text3);font-size:10px;margin-top:10px;font-family:'Space Mono',monospace;}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:0;margin-bottom:20px;background:var(--surface2);border-radius:10px;padding:4px;border:1px solid var(--border);}
+.tab-btn{flex:1;padding:9px;font-size:12px;font-weight:600;border-radius:7px;border:none;background:none;color:var(--text3);cursor:pointer;transition:all 0.15s;font-family:'Space Grotesk',sans-serif;}
+.tab-btn.active{background:var(--neon);color:#0d0f0a;}
+
+@media(max-width:480px){body{padding:10px;}.modal-box{padding:18px;}}
+</style>
 </head>
 <body>
-    <div class="container">
 
-        <!-- Logo QGK -->
-        <div class="logo-header">
-            <svg class="logo-hex" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                <polygon points="50,4 92,27 92,73 50,96 8,73 8,27"
-                         fill="#2e3d1a" stroke="#4a5c2f" stroke-width="2"/>
-                <polygon points="50,16 80,33 80,67 50,84 20,67 20,33"
-                         fill="none" stroke="#4a5c2f" stroke-width="1" opacity="0.5"/>
-                <text x="50" y="62" text-anchor="middle"
-                      font-family="Black Ops One, cursive" font-size="28"
-                      fill="#7fff00" letter-spacing="1">QGK</text>
-            </svg>
-            <div class="logo-text-block">
-                <span class="logo-qgk">QGK</span>
-                <span class="logo-sub">Scanner DANFE</span>
-            </div>
-        </div>
+<!-- LOGIN -->
+<div class="login-screen" id="loginScreen">
+<div class="login-card">
+  <div class="login-logo">
+    <div class="login-hex">
+      <svg width="52" height="52" viewBox="0 0 100 100">
+        <polygon points="50,4 92,27 92,73 50,96 8,73 8,27" fill="#1a1d12" stroke="#2a2f1e" stroke-width="2"/>
+        <polygon points="50,16 80,33 80,67 50,84 20,67 20,33" fill="none" stroke="#363c28" stroke-width="1.5"/>
+        <text x="50" y="62" text-anchor="middle" font-family="Black Ops One, cursive" font-size="26" fill="#a8ff3e" letter-spacing="1">QGK</text>
+      </svg>
+    </div>
+    <div class="login-title">PACKSCAN</div>
+    <div class="login-sub">Kit Fulfillment System · v2.0</div>
+  </div>
+  <div class="login-error" id="loginError"></div>
+  <div class="login-field">
+    <label>Email</label>
+    <input type="email" id="loginEmail" placeholder="seu@email.com" autocomplete="email">
+  </div>
+  <div class="login-field">
+    <label>Senha</label>
+    <input type="password" id="loginSenha" placeholder="••••••••" autocomplete="current-password">
+  </div>
+  <button class="login-btn" id="loginBtn" onclick="fazerLogin()">⬡ ENTRAR</button>
+</div>
+</div>
 
-        <div class="divider"></div>
+<!-- APP -->
+<div class="container" id="appContainer" style="display:none;">
 
-        <div id="feedback" class="feedback"></div>
+  <div class="app-header">
+    <svg class="app-logo-hex" width="38" height="38" viewBox="0 0 100 100">
+      <polygon points="50,4 92,27 92,73 50,96 8,73 8,27" fill="#1a1d12" stroke="#2a2f1e" stroke-width="2"/>
+      <polygon points="50,16 80,33 80,67 50,84 20,67 20,33" fill="none" stroke="#363c28" stroke-width="1.5"/>
+      <text x="50" y="62" text-anchor="middle" font-family="Black Ops One, cursive" font-size="26" fill="#a8ff3e" letter-spacing="1">QGK</text>
+    </svg>
+    <div>
+      <div class="app-title">PACKSCAN</div>
+      <div class="app-sub">Kit Fulfillment · <span id="headerUser">–</span></div>
+    </div>
+    <button class="btn-logout" onclick="fazerLogout()">🚪 Sair</button>
+  </div>
 
-        <div class="form-group">
-            <label for="inputNomeColaborador">👤 Colaborador</label>
-            <input type="text" id="inputNomeColaborador" placeholder="Nome do colaborador" autocomplete="off">
-        </div>
+  <div id="feedback" class="feedback"></div>
 
-        <div class="form-group">
-            <label for="inputNomeLoja">🏪 Loja</label>
-            <input type="text" id="inputNomeLoja" placeholder="Nome da loja" autocomplete="off">
-        </div>
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('scanner',this)">📦 Scanner</button>
+    <button class="tab-btn" onclick="showTab('devolucoes',this)">↩ Devoluções</button>
+    <button class="tab-btn" onclick="showTab('importar',this)">⬆ Importar CSV</button>
+  </div>
 
-        <button id="btnEscanear" class="btn-primary">
-            📷 Escanear com Câmera
-        </button>
-
-        <button id="btnLeitorCodigo" class="btn-secondary">
-            🔍 Usar Leitor de Código de Barras
-        </button>
-
-        <!-- Leitor de código invisível -->
-        <div id="barcodeInputContainer" class="barcode-input-container">
-            <input type="text" id="barcodeDisplay" class="barcode-display" placeholder="// AGUARDANDO CÓDIGO //" readonly>
-            <div class="barcode-hint">⬡ APONTE O LEITOR PARA O CÓDIGO DE BARRAS</div>
-            <input type="text" id="barcodeInput" class="hidden-barcode-input" autocomplete="off">
-            <button id="btnFecharLeitor" class="btn-close-camera" style="margin-top: 10px;">
-                ✕ FECHAR LEITOR
-            </button>
-        </div>
-
-        <div id="engineBadge" class="engine-badge">⬡ VERIFICANDO SUPORTE...</div>
-
-        <div id="cameraContainer" class="camera-container" style="display: none;">
-            <video id="video" playsinline></video>
-            <div class="camera-overlay"></div>
-            <div class="camera-hint" id="cameraHint">⬡ POSICIONE O CÓDIGO DENTRO DA ÁREA</div>
-            <button id="btnFecharCamera" class="btn-close-camera">
-                ✕ FECHAR CÂMERA
-            </button>
-        </div>
-
-        <div class="notas-section">
-            <div class="section-header">
-                <h2>📋 Notas Escaneadas</h2>
-                <span id="contador" class="contador">0</span>
-            </div>
-            <div id="listaNotas" class="lista-notas">
-                <p class="empty-state">// nenhuma nota escaneada ainda</p>
-            </div>
-            <div id="actionButtons" class="action-buttons" style="display: none;">
-                <button id="btnExportarJSON" class="btn-success">
-                    📊 Exportar para Dashboard (JSON)
-                </button>
-                <div class="button-group">
-                    <button id="btnExportarPDF" class="btn-primary">
-                        📄 Exportar PDF
-                    </button>
-                    <button id="btnLimpar" class="btn-danger" disabled>
-                        🗑️ Limpar Tudo
-                    </button>
-                </div>
-            </div>
-        </div>
+  <!-- TAB SCANNER -->
+  <div id="tab-scanner">
+    <div class="form-group">
+      <label>👤 Colaborador</label>
+      <input type="text" id="inputColaborador" placeholder="Nome do colaborador" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label>🏪 Loja</label>
+      <div id="lojaSelector" class="loja-selector">
+        <div style="color:var(--text3);font-size:12px;font-family:'Space Mono',monospace;padding:10px;text-align:center;">⟳ Carregando lojas...</div>
+      </div>
+      <input type="hidden" id="inputLoja">
     </div>
 
-    <!-- Modal de Confirmação -->
-    <div id="modalConfirmacao" class="modal-confirmacao">
-        <div class="modal-content">
-            <div class="modal-header">⬡ CONFIRMAR LEITURA</div>
-            <div class="modal-info">
-                <div class="modal-info-item">
-                    <span class="modal-info-label">Colaborador</span>
-                    <span id="modalColaborador" class="modal-info-value">-</span>
-                </div>
-                <div class="modal-info-item">
-                    <span class="modal-info-label">Loja</span>
-                    <span id="modalLoja" class="modal-info-value">-</span>
-                </div>
-                <div class="modal-info-item">
-                    <span class="modal-info-label">NF</span>
-                    <span id="modalNumeroNF" class="modal-info-value">-</span>
-                </div>
-            </div>
-            <div id="modalBarcode" class="modal-barcode"></div>
+    <button id="btnEscanear" class="btn-primary" onclick="iniciarScanner()">📷 Escanear com Câmera</button>
+    <button id="btnLeitor" class="btn-secondary" onclick="iniciarLeitor()">🔍 Usar Leitor de Código</button>
 
-            <!-- Checkbox foto -->
-            <label class="foto-checkbox-label">
-                <input type="checkbox" id="checkFoto">
-                <span class="foto-checkbox-box"></span>
-                <span class="foto-checkbox-text">📷 Nota acompanha foto</span>
-            </label>
-
-            <div class="modal-actions">
-                <button id="btnCancelar" class="btn-danger">✕ Cancelar</button>
-                <button id="btnConfirmar" class="btn-success">✓ Confirmar</button>
-            </div>
-            <div class="enter-hint">// pressione ENTER para confirmar</div>
-        </div>
+    <div id="barcodeInputContainer" class="barcode-input-container">
+      <input type="text" id="barcodeDisplay" class="barcode-display" placeholder="// AGUARDANDO CÓDIGO //" readonly>
+      <div class="barcode-hint">⬡ APONTE O LEITOR PARA A ETIQUETA DO PACOTE</div>
+      <input type="text" id="barcodeInput" class="hidden-barcode-input" autocomplete="off">
+      <button class="btn-close" onclick="pararLeitor()">✕ FECHAR LEITOR</button>
     </div>
 
-    <!-- Modal editar loja -->
-    <div id="modalEditarLoja" class="modal-confirmacao">
-        <div class="modal-content">
-            <div class="modal-header">✏️ EDITAR LOJA</div>
-            <div class="modal-info" style="margin-bottom:16px;">
-                <div class="modal-info-item">
-                    <span class="modal-info-label">NF</span>
-                    <span id="editModalNF" class="modal-info-value">-</span>
-                </div>
-                <div class="modal-info-item">
-                    <span class="modal-info-label">Colaborador</span>
-                    <span id="editModalColaborador" class="modal-info-value">-</span>
-                </div>
-            </div>
-            <div class="form-group" style="margin-bottom:18px;">
-                <label for="editInputLoja">🏪 Nova Loja</label>
-                <input type="text" id="editInputLoja" placeholder="Nome da loja" autocomplete="off">
-            </div>
-            <div class="modal-actions">
-                <button id="btnEditCancelar" class="btn-danger">✕ Cancelar</button>
-                <button id="btnEditSalvar" class="btn-success">✓ Salvar</button>
-            </div>
-        </div>
+    <div id="engineBadge" class="engine-badge">⬡ VERIFICANDO SUPORTE...</div>
+
+    <div id="cameraContainer" class="camera-container">
+      <video id="video" playsinline></video>
+      <div class="camera-overlay"></div>
+      <div class="camera-hint" id="cameraHint">⬡ POSICIONE A ETIQUETA NA ÁREA</div>
+      <button class="btn-close" onclick="pararScanner()">✕ FECHAR CÂMERA</button>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <!-- ZXing fallback para browsers sem BarcodeDetector nativo -->
-    <script src="https://unpkg.com/@zxing/library@latest/umd/index.min.js"></script>
+    <div class="kits-section">
+      <div class="section-header">
+        <h2>📦 Kits Preparados Hoje</h2>
+        <span id="contadorKits" class="contador">0</span>
+      </div>
+      <div id="listaKits" class="lista-kits">
+        <p class="empty-state">// nenhum kit preparado hoje</p>
+      </div>
+      <div id="actionButtons" class="action-buttons" style="display:none;">
+        <div class="button-group">
+          <button id="btnExportarPDF" class="btn-secondary" onclick="exportarRelatorio('kits')">📄 Exportar PDF</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    <script>
-    const { jsPDF } = window.jspdf;
+  <!-- TAB DEVOLUÇÕES -->
+  <div id="tab-devolucoes" style="display:none;">
+    <div style="background:var(--yellow-bg);border:1px solid rgba(255,216,77,0.2);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:var(--yellow);font-family:'Space Mono',monospace;">
+      ⚠ MODO DEVOLUÇÃO — Beepe a etiqueta para verificar itens esperados e registrar a devolução.
+    </div>
+    <div class="form-group">
+      <label>👤 Colaborador</label>
+      <input type="text" id="inputColaboradorDev" placeholder="Nome do colaborador" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label>🏪 Loja</label>
+      <div id="lojaSelectorDev" class="loja-selector">
+        <div style="color:var(--text3);font-size:12px;font-family:'Space Mono',monospace;padding:10px;text-align:center;">⟳ Carregando lojas...</div>
+      </div>
+      <input type="hidden" id="inputLojaDev">
+    </div>
+    <button class="btn-danger" style="width:100%;margin-bottom:8px;" onclick="iniciarScannerDev()">📷 Escanear Devolução</button>
+    <button class="btn-secondary" onclick="iniciarLeitorDev()">🔍 Leitor de Código</button>
 
-    // ─── DOM ───────────────────────────────────────────────
-    const inputNomeColaborador  = document.getElementById('inputNomeColaborador');
-    const inputNomeLoja         = document.getElementById('inputNomeLoja');
-    const btnEscanear           = document.getElementById('btnEscanear');
-    const btnLeitorCodigo       = document.getElementById('btnLeitorCodigo');
-    const cameraContainer       = document.getElementById('cameraContainer');
-    const video                 = document.getElementById('video');
-    const listaNotas            = document.getElementById('listaNotas');
-    const contador              = document.getElementById('contador');
-    const feedback              = document.getElementById('feedback');
-    const btnExportarJSON       = document.getElementById('btnExportarJSON');
-    const btnExportarPDF        = document.getElementById('btnExportarPDF');
-    const btnLimpar             = document.getElementById('btnLimpar');
-    const actionButtons         = document.getElementById('actionButtons');
-    const modalConfirmacao      = document.getElementById('modalConfirmacao');
-    const modalColaborador      = document.getElementById('modalColaborador');
-    const modalLoja             = document.getElementById('modalLoja');
-    const modalNumeroNF         = document.getElementById('modalNumeroNF');
-    const modalBarcode          = document.getElementById('modalBarcode');
-    const btnCancelar           = document.getElementById('btnCancelar');
-    const btnConfirmar          = document.getElementById('btnConfirmar');
-    const barcodeInputContainer = document.getElementById('barcodeInputContainer');
-    const barcodeInput          = document.getElementById('barcodeInput');
-    const barcodeDisplay        = document.getElementById('barcodeDisplay');
-    const cameraHint            = document.getElementById('cameraHint');
-    const engineBadge           = document.getElementById('engineBadge');
+    <div id="barcodeInputContainerDev" class="barcode-input-container">
+      <input type="text" id="barcodeDisplayDev" class="barcode-display" placeholder="// AGUARDANDO CÓDIGO //" readonly style="border-color:var(--yellow);">
+      <div class="barcode-hint" style="color:var(--yellow);">⬡ MODO DEVOLUÇÃO — ESCANEIE A ETIQUETA</div>
+      <input type="text" id="barcodeInputDev" class="hidden-barcode-input" autocomplete="off">
+      <button class="btn-close" onclick="pararLeitorDev()">✕ FECHAR LEITOR</button>
+    </div>
 
-    // ─── ESTADO ────────────────────────────────────────────
-    let notasFiscais            = [];
-    let scannerAtivo            = false;
-    let stream                  = null;
-    let pdfExportado            = false;
-    let modoLeitor              = false;
-    let codigoAtualConfirmacao  = null;
-    let temFotoAtual            = false;
-    let rafId                   = null;   // requestAnimationFrame do BarcodeDetector
-    let zxingReader             = null;   // instância ZXing
-    let loopPausado             = false;  // true enquanto modal está aberto
-    let cooldownCodigo          = '';     // último código aceito (evita reler imediatamente)
-    let cooldownTimer           = null;   // timer que limpa o cooldown
+    <div id="cameraContainerDev" class="camera-container">
+      <video id="videoDev" playsinline></video>
+      <div class="camera-overlay" style="border-color:var(--yellow);box-shadow:0 0 0 9999px rgba(0,0,0,0.5),0 0 20px rgba(255,216,77,0.3);"></div>
+      <div class="camera-hint" id="cameraHintDev" style="color:var(--yellow);">⬡ MODO DEVOLUÇÃO</div>
+      <button class="btn-close" onclick="pararScannerDev()">✕ FECHAR CÂMERA</button>
+    </div>
 
-    // ─── LEITOR FÍSICO ─────────────────────────────────────
-    const MIN_LEN      = 20;
-    const PAUSA_LEITOR = 200;
-    let bufferLeitor   = '';
-    let timerLeitor    = null;
-    let ultimoKeyTime  = 0;
+    <div class="kits-section">
+      <div class="section-header">
+        <h2>↩ Devoluções Hoje</h2>
+        <span id="contadorDevs" class="contador" style="background:var(--yellow);color:#0d0f0a;">0</span>
+      </div>
+      <div id="listaDevs" class="lista-kits">
+        <p class="empty-state">// nenhuma devolução registrada hoje</p>
+      </div>
+    </div>
+  </div>
 
-    // ─── EVENTOS BASE ──────────────────────────────────────
-    btnEscanear.addEventListener('click', iniciarScanner);
-    btnLeitorCodigo.addEventListener('click', iniciarLeitorCodigo);
-    document.getElementById('btnFecharCamera').addEventListener('click', pararScanner);
-    document.getElementById('btnFecharLeitor').addEventListener('click', pararLeitorCodigo);
-    btnExportarJSON.addEventListener('click', exportarJSON);
-    btnExportarPDF.addEventListener('click', exportarPDF);
-    btnLimpar.addEventListener('click', limparNotas);
-    btnCancelar.addEventListener('click', fecharModal);
-    btnConfirmar.addEventListener('click', confirmarLeitura);
+  <!-- TAB IMPORTAR CSV -->
+  <div id="tab-importar" style="display:none;">
+    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:20px;margin-bottom:16px;">
+      <div style="font-family:'Black Ops One',cursive;font-size:14px;letter-spacing:2px;color:var(--neon);margin-bottom:6px;">⬆ IMPORTAR PEDIDOS</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:16px;">
+        Exporte o relatório de pedidos do <strong style="color:var(--text);">Shopee Seller Center</strong> ou <strong style="color:var(--text);">Mercado Livre</strong> e importe aqui. O sistema detecta o formato automaticamente.
+      </div>
 
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' && modalConfirmacao.classList.contains('show')) {
-            e.preventDefault(); confirmarLeitura(); return;
-        }
-        if (modoLeitor && !modalConfirmacao.classList.contains('show')) capturarTeclaLeitor(e);
-    });
+      <div class="form-group">
+        <label>🏪 Loja de Destino</label>
+        <select id="importLoja" style="width:100%;padding:11px 14px;border:1px solid var(--border2);border-radius:8px;font-size:14px;font-family:'Space Grotesk',sans-serif;background:var(--surface2);color:var(--text);outline:none;">
+          <option value="">Selecione uma loja...</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>📋 Plataforma</label>
+        <select id="importPlataforma" style="width:100%;padding:11px 14px;border:1px solid var(--border2);border-radius:8px;font-size:14px;font-family:'Space Grotesk',sans-serif;background:var(--surface2);color:var(--text);outline:none;">
+          <option value="shopee">Shopee</option>
+          <option value="mercadolivre">Mercado Livre</option>
+        </select>
+      </div>
 
-    carregarDoLocalStorage();
+      <div id="csvDropZone" style="border:2px dashed var(--border2);border-radius:10px;padding:40px 20px;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:12px;"
+           onclick="document.getElementById('csvFileInput').click()"
+           ondragover="event.preventDefault();this.style.borderColor='var(--neon)'"
+           ondragleave="this.style.borderColor='var(--border2)'"
+           ondrop="handleCSVDrop(event)">
+        <div style="font-size:36px;margin-bottom:10px;">📄</div>
+        <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;">Arraste o CSV ou clique para selecionar</div>
+        <div style="font-size:11px;color:var(--text3);font-family:'Space Mono',monospace;">Shopee: relatório de pedidos · ML: lista de vendas</div>
+        <input type="file" id="csvFileInput" accept=".csv,.xlsx,.xls" style="display:none;" onchange="handleCSVFile(event)">
+      </div>
+      <div id="importStatus" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;font-family:'Space Mono',monospace;font-size:12px;"></div>
+    </div>
 
-    // ═══════════════════════════════════════════════════════
-    //  DETECÇÃO DE ENGINE
-    //  Prioridade: BarcodeDetector (nativo) → ZXing (JS)
-    // ═══════════════════════════════════════════════════════
-    const NATIVE_SUPPORTED = ('BarcodeDetector' in window);
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;">
+      <div style="font-size:11px;font-family:'Space Mono',monospace;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">📋 Como exportar</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.8;">
+        <strong style="color:var(--neon);">Shopee:</strong> Seller Center → Meus Pedidos → Exportar → Todos os pedidos → Baixar CSV<br>
+        <strong style="color:var(--yellow);">ML:</strong> Central do Vendedor → Vendas → Exportar → Formato CSV
+      </div>
+    </div>
+  </div>
 
-    function setEngineBadge(txt, ok) {
-        engineBadge.textContent = txt;
-        engineBadge.className   = 'engine-badge ' + (ok ? 'native' : 'fallback');
-    }
+</div><!-- /container -->
 
-    // Mostra a engine disponível ao carregar
-    if (NATIVE_SUPPORTED) {
-        BarcodeDetector.getSupportedFormats().then(fmts => {
-            const temCode128 = fmts.includes('code_128');
-            setEngineBadge(
-                '⬡ NATIVE BARCODE API' + (temCode128 ? ' · CODE128 ✓' : ''),
-                true
-            );
-        }).catch(() => setEngineBadge('⬡ NATIVE BARCODE API', true));
+<!-- MODAL: PEDIDO ENCONTRADO (Kit Normal) -->
+<div class="modal" id="modalPedido">
+<div class="modal-box" style="max-width:460px;">
+  <div class="modal-title">⬡ CONFIRMAR KIT</div>
+  <div id="alertaCancelado" class="alerta-cancelado" style="display:none;">⚠ ATENÇÃO: PEDIDO CANCELADO</div>
+  <div id="alertaJaPreparado" class="alerta-ja-preparado" style="display:none;"></div>
+  <div class="pedido-card" id="pedidoCardModal"></div>
+  <label class="foto-checkbox-label">
+    <input type="checkbox" id="checkFotoKit">
+    <span class="foto-checkbox-box"></span>
+    <span class="foto-checkbox-text">📷 Kit acompanha foto</span>
+  </label>
+  <div class="modal-actions">
+    <button class="btn-danger" onclick="fecharModalPedido()">✕ Cancelar</button>
+    <button class="btn-success" id="btnConfirmarKit" onclick="confirmarKit()">✓ Confirmar Kit</button>
+  </div>
+  <div class="enter-hint">// pressione ENTER para confirmar</div>
+</div>
+</div>
+
+<!-- MODAL: DEVOLUÇÃO -->
+<div class="modal" id="modalDevolucao">
+<div class="modal-box" style="max-width:460px;">
+  <div class="modal-title" style="color:var(--yellow);">↩ REGISTRAR DEVOLUÇÃO</div>
+  <div class="pedido-card" id="devPedidoCard"></div>
+  <div style="font-size:10px;font-family:'Space Mono',monospace;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">📝 Observações / Condição do pacote</div>
+  <textarea class="devolucao-input" id="devObservacoes" placeholder="Descreva a condição do pacote, itens presentes, danos, etc..."></textarea>
+  <div class="modal-actions">
+    <button class="btn-secondary" onclick="fecharModalDevolucao()">✕ Cancelar</button>
+    <button class="btn-danger" style="flex:1;padding:12px;font-size:13px;" onclick="confirmarDevolucao()">↩ Registrar Devolução</button>
+  </div>
+</div>
+</div>
+
+<!-- MODAL: PEDIDO NÃO ENCONTRADO -->
+<div class="modal" id="modalNaoEncontrado">
+<div class="modal-box">
+  <div class="modal-title" style="color:var(--red);">⚠ NÃO ENCONTRADO</div>
+  <div style="text-align:center;margin-bottom:16px;">
+    <div style="font-size:36px;margin-bottom:10px;">🔍</div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.6;" id="msgNaoEncontrado"></div>
+  </div>
+  <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:14px;font-family:'Space Mono',monospace;font-size:11px;color:var(--text3);">
+    Código escaneado:<br><span id="codigoNaoEncontrado" style="color:var(--text);word-break:break-all;"></span>
+  </div>
+  <button class="btn-secondary" style="width:100%;" onclick="fecharModalNaoEncontrado()">OK</button>
+</div>
+</div>
+
+<script src="https://unpkg.com/@zxing/library@latest/umd/index.min.js"></script>
+<script>
+// ════════════════════════════════════════════════════
+// CONFIG
+// ════════════════════════════════════════════════════
+const APPS_SCRIPT_URL = 'COLE_SUA_URL_AQUI';
+const SESSION_KEY = 'qgk_packscan_session';
+
+// ── Estado ──
+let modoAtivo = null; // 'scanner' | 'leitor' | 'scannerDev' | 'leitorDev'
+let scannerStream = null;
+let scannerDevStream = null;
+let rafId = null;
+let rafIdDev = null;
+let loopPausado = false;
+let loopPausadoDev = false;
+let cooldown = '';
+let cooldownDev = '';
+let cooldownTimer = null;
+let cooldownTimerDev = null;
+let pedidoAtualConfirmacao = null;
+let pedidoDevConfirmacao = null;
+let kitsHoje = [];
+let devsHoje = [];
+let lojas = [];
+
+const NATIVE = ('BarcodeDetector' in window);
+const MIN_LEN = 10;
+const PAUSA_LEITOR = 200;
+let bufferLeitor = '';
+let timerLeitor = null;
+let ultimoKeyTime = 0;
+let bufferLeitorDev = '';
+let timerLeitorDev = null;
+
+// ════════════════════════════════════════════════════
+// TABS
+// ════════════════════════════════════════════════════
+function showTab(tab, el) {
+  document.querySelectorAll('[id^="tab-"]').forEach(t => t.style.display = 'none');
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).style.display = 'block';
+  if (el) el.classList.add('active');
+
+  if (tab === 'importar') preencherSelectLojas();
+}
+
+// ════════════════════════════════════════════════════
+// JSONP
+// ════════════════════════════════════════════════════
+function jsonpRequest(params, timeout = 12000) {
+  return new Promise((resolve, reject) => {
+    const cb = 'cb_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+    const timer = setTimeout(() => {
+      delete window[cb];
+      document.getElementById(cb)?.remove();
+      reject(new Error('Timeout'));
+    }, timeout);
+    window[cb] = data => {
+      clearTimeout(timer);
+      delete window[cb];
+      document.getElementById(cb)?.remove();
+      resolve(data);
+    };
+    const qs = Object.entries({ ...params, callback: cb })
+      .map(([k,v]) => encodeURIComponent(k) + '=' + encodeURIComponent(v)).join('&');
+    const s = document.createElement('script');
+    s.id = cb;
+    s.src = APPS_SCRIPT_URL + '?' + qs;
+    s.onerror = () => { clearTimeout(timer); delete window[cb]; s.remove(); reject(new Error('Erro de rede')); };
+    document.head.appendChild(s);
+  });
+}
+
+// ════════════════════════════════════════════════════
+// AUTH
+// ════════════════════════════════════════════════════
+function hashSenha(s) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = Math.imul(31, h) + s.charCodeAt(i) | 0;
+  return 'h' + Math.abs(h).toString(36);
+}
+
+async function fazerLogin() {
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+  const senha = document.getElementById('loginSenha').value;
+  const errEl = document.getElementById('loginError');
+  const btn = document.getElementById('loginBtn');
+  if (!email || !senha) { mostrarErroLogin('Preencha email e senha.'); return; }
+  btn.disabled = true; btn.textContent = '⟳ Verificando...'; errEl.style.display = 'none';
+  try {
+    const res = await jsonpRequest({ action: 'login', email, senha: hashSenha(senha) });
+    if (res && res.ok) {
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify(res));
+      mostrarApp(res);
     } else {
-        setEngineBadge('⬡ ZXING JS (FALLBACK)', false);
+      mostrarErroLogin(res?.erro || 'Email ou senha incorretos.');
     }
+  } catch(e) {
+    mostrarErroLogin(e?.message === 'Timeout' ? 'Servidor demorou demais. Tente novamente.' : 'Sem conexão.');
+  } finally {
+    btn.disabled = false; btn.textContent = '⬡ ENTRAR';
+  }
+}
 
-    // ═══════════════════════════════════════════════════════
-    //  CÂMERA – iniciar / parar
-    // ═══════════════════════════════════════════════════════
-    async function iniciarScanner() {
-        const nomeColaborador = inputNomeColaborador.value.trim();
-        const nomeLoja        = inputNomeLoja.value.trim();
-        if (!nomeColaborador || !nomeLoja) {
-            mostrarFeedback('❌ Preencha colaborador e loja primeiro', '#c0392b');
+function mostrarErroLogin(msg) {
+  const el = document.getElementById('loginError');
+  el.textContent = msg; el.style.display = 'block';
+}
+
+function mostrarApp(usuario) {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appContainer').style.display = 'block';
+  document.getElementById('headerUser').textContent = usuario.nome || usuario.email;
+
+  const inp = document.getElementById('inputColaborador');
+  const inp2 = document.getElementById('inputColaboradorDev');
+  [inp, inp2].forEach(el => {
+    if (el && usuario.nome) {
+      el.value = usuario.nome;
+      el.readOnly = true;
+      el.style.opacity = '0.6';
+    }
+  });
+
+  iniciarEngineBadge();
+  carregarLojas();
+  carregarKitsLocais();
+}
+
+function fazerLogout() {
+  if (scannerStream) pararScanner();
+  if (scannerDevStream) pararScannerDev();
+  sessionStorage.removeItem(SESSION_KEY);
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('appContainer').style.display = 'none';
+}
+
+// ════════════════════════════════════════════════════
+// LOJAS
+// ════════════════════════════════════════════════════
+async function carregarLojas() {
+  try {
+    const res = await jsonpRequest({ action: 'listarLojas' });
+    lojas = Array.isArray(res) ? res : [];
+  } catch(e) {
+    const cached = localStorage.getItem('ps_lojas');
+    if (cached) try { lojas = JSON.parse(cached); } catch(_) { lojas = []; }
+  }
+  if (lojas.length) localStorage.setItem('ps_lojas', JSON.stringify(lojas));
+  renderLojaSelectors();
+}
+
+function renderLojaSelectors() {
+  ['lojaSelector', 'lojaSelectorDev'].forEach((id, idx) => {
+    const hidden = idx === 0 ? 'inputLoja' : 'inputLojaDev';
+    const sel = document.getElementById(id);
+    if (!lojas.length) {
+      sel.innerHTML = '<div style="color:var(--text3);font-size:11px;font-family:\'Space Mono\',monospace;padding:10px;text-align:center;">Nenhuma loja. Acesse o Dashboard para cadastrar.</div>';
+      return;
+    }
+    sel.innerHTML = lojas.map(l => `
+      <label class="loja-option" onclick="selecionarLoja('${l.nome}','${l.plataforma}',this,'${hidden}')">
+        <input type="radio" name="${id}Radio" value="${l.nome}">
+        <span class="loja-radio-box"></span>
+        <span class="loja-option-name">${l.nome}</span>
+        <span class="plat-badge plat-${l.plataforma||'shopee'}">${(l.plataforma||'shopee').toUpperCase()}</span>
+      </label>`).join('');
+  });
+}
+
+function selecionarLoja(nome, plataforma, el, hiddenId) {
+  document.getElementById(hiddenId).value = nome;
+  const parent = el.closest('.loja-selector');
+  parent.querySelectorAll('.loja-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function preencherSelectLojas() {
+  const sel = document.getElementById('importLoja');
+  sel.innerHTML = '<option value="">Selecione uma loja...</option>' +
+    lojas.map(l => `<option value="${l.nome}">${l.nome} (${l.plataforma||'shopee'})</option>`).join('');
+}
+
+// ════════════════════════════════════════════════════
+// ENGINE BADGE
+// ════════════════════════════════════════════════════
+function iniciarEngineBadge() {
+  const badge = document.getElementById('engineBadge');
+  if (NATIVE) {
+    badge.textContent = '⬡ NATIVE BARCODE API ✓';
+    badge.className = 'engine-badge native';
+  } else {
+    badge.textContent = '⬡ ZXING FALLBACK';
+    badge.className = 'engine-badge fallback';
+  }
+}
+
+// ════════════════════════════════════════════════════
+// CÂMERA — SCANNER KITS
+// ════════════════════════════════════════════════════
+async function iniciarScanner() {
+  if (!validarCampos()) return;
+  modoAtivo = 'scanner';
+  loopPausado = false;
+  const cam = document.getElementById('cameraContainer');
+  cam.style.display = 'block';
+  document.getElementById('btnEscanear').style.display = 'none';
+  document.getElementById('btnLeitor').style.display = 'none';
+  try {
+    scannerStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 } } });
+    const video = document.getElementById('video');
+    video.srcObject = scannerStream;
+    await video.play();
+    NATIVE ? iniciarDetectorNativo('video', 'cameraHint', processar) : iniciarZXing('video', 'cameraHint', processar);
+  } catch(e) {
+    mostrarFeedback('❌ Erro ao acessar câmera', 'error'); pararScanner();
+  }
+}
+
+function pararScanner() {
+  modoAtivo = null; loopPausado = false;
+  clearTimeout(cooldownTimer); cooldown = '';
+  if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+  if (scannerStream) { scannerStream.getTracks().forEach(t => t.stop()); scannerStream = null; }
+  document.getElementById('cameraContainer').style.display = 'none';
+  document.getElementById('btnEscanear').style.display = 'flex';
+  document.getElementById('btnLeitor').style.display = 'flex';
+}
+
+// ════════════════════════════════════════════════════
+// CÂMERA — SCANNER DEVOLUÇÃO
+// ════════════════════════════════════════════════════
+async function iniciarScannerDev() {
+  if (!validarCamposDev()) return;
+  modoAtivo = 'scannerDev';
+  loopPausadoDev = false;
+  const cam = document.getElementById('cameraContainerDev');
+  cam.style.display = 'block';
+  try {
+    scannerDevStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 } } });
+    const video = document.getElementById('videoDev');
+    video.srcObject = scannerDevStream;
+    await video.play();
+    NATIVE ? iniciarDetectorNativo('videoDev', 'cameraHintDev', processarDev) : iniciarZXing('videoDev', 'cameraHintDev', processarDev);
+  } catch(e) {
+    mostrarFeedback('❌ Erro ao acessar câmera', 'error'); pararScannerDev();
+  }
+}
+
+function pararScannerDev() {
+  modoAtivo = null; loopPausadoDev = false;
+  clearTimeout(cooldownTimerDev); cooldownDev = '';
+  if (rafIdDev) { cancelAnimationFrame(rafIdDev); rafIdDev = null; }
+  if (scannerDevStream) { scannerDevStream.getTracks().forEach(t => t.stop()); scannerDevStream = null; }
+  document.getElementById('cameraContainerDev').style.display = 'none';
+}
+
+// ════════════════════════════════════════════════════
+// ENGINE: BarcodeDetector Nativo
+// ════════════════════════════════════════════════════
+function iniciarDetectorNativo(videoId, hintId, callback) {
+  const detector = new BarcodeDetector({ formats: ['code_128','qr_code','ean_13','ean_8','code_39','itf','data_matrix','pdf_417'] });
+  const video = document.getElementById(videoId);
+  const hint = document.getElementById(hintId);
+  let ultimo = ''; let votos = 0; const MIN_VOTOS = 2;
+  const isDev = videoId === 'videoDev';
+
+  const loop = async () => {
+    if (isDev ? loopPausadoDev : loopPausado) return;
+    if (video.readyState >= 2) {
+      try {
+        const barcodes = await detector.detect(video);
+        if (barcodes.length > 0) {
+          const melhor = barcodes.reduce((a,b) => a.rawValue.length >= b.rawValue.length ? a : b);
+          const raw = melhor.rawValue.trim();
+          if (raw === (isDev ? cooldownDev : cooldown)) { (isDev ? rafIdDev = requestAnimationFrame(loop) : rafId = requestAnimationFrame(loop)); return; }
+          if (raw.length >= MIN_LEN) {
+            if (raw === ultimo) votos++; else { ultimo = raw; votos = 1; }
+            hint.textContent = `⬡ ${raw.length} chars · ${votos}/${MIN_VOTOS}`;
+            if (votos >= MIN_VOTOS) {
+              if (isDev) { loopPausadoDev = true; } else { loopPausado = true; }
+              callback(raw);
+              return;
+            }
+          } else hint.textContent = '⬡ CÓDIGO DETECTADO – APROXIME MAIS';
+        } else hint.textContent = isDev ? '⬡ MODO DEVOLUÇÃO – ESCANEIE A ETIQUETA' : '⬡ POSICIONE A ETIQUETA NA ÁREA';
+      } catch(e) {}
+    }
+    isDev ? (rafIdDev = requestAnimationFrame(loop)) : (rafId = requestAnimationFrame(loop));
+  };
+  isDev ? (rafIdDev = requestAnimationFrame(loop)) : (rafId = requestAnimationFrame(loop));
+}
+
+// ════════════════════════════════════════════════════
+// ENGINE: ZXing Fallback
+// ════════════════════════════════════════════════════
+function iniciarZXing(videoId, hintId, callback) {
+  if (typeof ZXing === 'undefined') { mostrarFeedback('❌ ZXing não carregou', 'error'); return; }
+  const hints = new Map();
+  hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [ZXing.BarcodeFormat.CODE_128, ZXing.BarcodeFormat.QR_CODE, ZXing.BarcodeFormat.EAN_13, ZXing.BarcodeFormat.CODE_39]);
+  hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
+  const reader = new ZXing.MultiFormatReader(); reader.setHints(hints);
+  const video = document.getElementById(videoId);
+  const hint = document.getElementById(hintId);
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  let ultimo = ''; let votos = 0; const MIN_VOTOS = 3;
+  const isDev = videoId === 'videoDev';
+
+  const loop = () => {
+    if (isDev ? loopPausadoDev : loopPausado) return;
+    if (video.readyState >= 2) {
+      canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0);
+      try {
+        const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const lum = new ZXing.RGBLuminanceSource(img.data, canvas.width, canvas.height);
+        const bin = new ZXing.HybridBinarizer(lum);
+        const bmp = new ZXing.BinaryBitmap(bin);
+        const result = reader.decode(bmp);
+        const raw = result.getText().trim();
+        if (raw.length >= MIN_LEN) {
+          if (raw === ultimo) votos++; else { ultimo = raw; votos = 1; }
+          hint.textContent = `⬡ ${votos}/${MIN_VOTOS}`;
+          if (votos >= MIN_VOTOS) {
+            if (isDev) loopPausadoDev = true; else loopPausado = true;
+            callback(raw);
             return;
+          }
         }
-
-        scannerAtivo = true;
-        cameraContainer.style.display = 'block';
-        btnEscanear.style.display     = 'none';
-        btnLeitorCodigo.style.display = 'none';
-        cameraHint.textContent        = '⬡ INICIANDO...';
-
-        try {
-            // Solicita câmera traseira em alta resolução
-            stream = await navigator.mediaDevices.getUserMedia({
-                video: {
-                    facingMode: { ideal: 'environment' },
-                    width:  { ideal: 1920 },
-                    height: { ideal: 1080 }
-                }
-            });
-            video.srcObject = stream;
-            await video.play();
-            cameraHint.textContent = '⬡ POSICIONE O CÓDIGO DENTRO DA ÁREA';
-
-            if (NATIVE_SUPPORTED) {
-                iniciarBarcodeDetectorNativo();
-            } else {
-                await iniciarZXing();
-            }
-        } catch(err) {
-            console.error('[CAMERA]', err);
-            mostrarFeedback('❌ Erro ao acessar câmera', '#c0392b');
-            pararScanner();
-        }
+      } catch(e) { hint.textContent = isDev ? '⬡ MODO DEVOLUÇÃO' : '⬡ AGUARDANDO CÓDIGO...'; }
     }
+    isDev ? (rafIdDev = requestAnimationFrame(loop)) : (rafId = requestAnimationFrame(loop));
+  };
+  isDev ? (rafIdDev = requestAnimationFrame(loop)) : (rafId = requestAnimationFrame(loop));
+}
 
-    // Para TUDO e fecha a câmera (botão Fechar)
-    function pararScanner() {
-        scannerAtivo = false;
-        loopPausado  = false;
-        clearTimeout(cooldownTimer);
-        cooldownCodigo = '';
+// ════════════════════════════════════════════════════
+// LEITOR FÍSICO
+// ════════════════════════════════════════════════════
+function iniciarLeitor() {
+  if (!validarCampos()) return;
+  modoAtivo = 'leitor';
+  bufferLeitor = '';
+  document.getElementById('barcodeInputContainer').classList.add('show');
+  document.getElementById('btnEscanear').style.display = 'none';
+  document.getElementById('btnLeitor').style.display = 'none';
+  document.getElementById('barcodeInput').value = '';
+  document.getElementById('barcodeInput').focus();
+}
 
-        if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
-        if (zxingReader) { try { zxingReader.reset(); } catch(e) {} zxingReader = null; }
-        if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+function pararLeitor() {
+  modoAtivo = null; bufferLeitor = '';
+  clearTimeout(timerLeitor);
+  document.getElementById('barcodeInputContainer').classList.remove('show');
+  document.getElementById('btnEscanear').style.display = 'flex';
+  document.getElementById('btnLeitor').style.display = 'flex';
+  document.getElementById('barcodeDisplay').value = '';
+  document.getElementById('barcodeDisplay').placeholder = '// AGUARDANDO CÓDIGO //';
+}
 
-        cameraContainer.style.display = 'none';
-        btnEscanear.style.display     = 'flex';
-        btnLeitorCodigo.style.display = 'flex';
+function iniciarLeitorDev() {
+  if (!validarCamposDev()) return;
+  modoAtivo = 'leitorDev';
+  bufferLeitorDev = '';
+  document.getElementById('barcodeInputContainerDev').classList.add('show');
+  document.getElementById('barcodeInputDev').value = '';
+  document.getElementById('barcodeInputDev').focus();
+}
+
+function pararLeitorDev() {
+  modoAtivo = null; bufferLeitorDev = '';
+  clearTimeout(timerLeitorDev);
+  document.getElementById('barcodeInputContainerDev').classList.remove('show');
+  document.getElementById('barcodeDisplayDev').value = '';
+  document.getElementById('barcodeDisplayDev').placeholder = '// AGUARDANDO CÓDIGO //';
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    if (document.getElementById('modalPedido').classList.contains('show')) {
+      e.preventDefault(); confirmarKit(); return;
     }
+    if (document.getElementById('modalDevolucao').classList.contains('show')) return;
+  }
+  if (modoAtivo === 'leitor' && !document.getElementById('modalPedido').classList.contains('show')) {
+    capturarTecla(e, false);
+  }
+  if (modoAtivo === 'leitorDev' && !document.getElementById('modalDevolucao').classList.contains('show')) {
+    capturarTecla(e, true);
+  }
+});
 
-    // Pausa o loop (modal aberto) sem fechar câmera
-    function pausarLoop() {
-        loopPausado = true;
-        if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
-        cameraHint.textContent = '⬡ AGUARDANDO CONFIRMAÇÃO...';
+function capturarTecla(e, isDev) {
+  const agora = Date.now();
+  const buf = isDev ? bufferLeitorDev : bufferLeitor;
+  if (agora - ultimoKeyTime > 500 && buf.length > 0) isDev ? bufferLeitorDev = '' : bufferLeitor = '';
+  ultimoKeyTime = agora;
+  if (e.key === 'Backspace') { e.preventDefault(); isDev ? bufferLeitorDev = bufferLeitorDev.slice(0,-1) : bufferLeitor = bufferLeitor.slice(0,-1); atualizarDisplay(isDev); return; }
+  if (e.key === 'Enter') { e.preventDefault(); const b = isDev ? bufferLeitorDev : bufferLeitor; if (b.length >= MIN_LEN) finalizarLeitor(b, isDev); return; }
+  if (e.key.length !== 1) return;
+  isDev ? bufferLeitorDev += e.key : bufferLeitor += e.key;
+  atualizarDisplay(isDev);
+  clearTimeout(isDev ? timerLeitorDev : timerLeitor);
+  const t = setTimeout(() => {
+    const b = isDev ? bufferLeitorDev : bufferLeitor;
+    if (b.length >= MIN_LEN) finalizarLeitor(b, isDev);
+    else if (b.length > 0) {
+      const disp = isDev ? 'barcodeDisplayDev' : 'barcodeDisplay';
+      document.getElementById(disp).value = '';
+      document.getElementById(disp).placeholder = `⚠ INCOMPLETO: ${b.length} chars`;
+      setTimeout(() => { isDev ? bufferLeitorDev = '' : bufferLeitor = ''; document.getElementById(disp).placeholder = '// AGUARDANDO CÓDIGO //'; }, 2000);
     }
+  }, PAUSA_LEITOR);
+  if (isDev) timerLeitorDev = t; else timerLeitor = t;
+}
 
-    // Retoma o loop após fechar o modal, com cooldown para não reler o mesmo código
-    function retomarLoop(codigoLido) {
-        loopPausado    = true; // mantém pausado durante cooldown
-        cooldownCodigo = codigoLido;
-        cameraHint.textContent = '⬡ RECARREGANDO...';
+function atualizarDisplay(isDev) {
+  const disp = isDev ? 'barcodeDisplayDev' : 'barcodeDisplay';
+  const buf = isDev ? bufferLeitorDev : bufferLeitor;
+  document.getElementById(disp).value = buf;
+  document.getElementById(disp).placeholder = buf ? '' : '// AGUARDANDO CÓDIGO //';
+}
 
-        clearTimeout(cooldownTimer);
-        cooldownTimer = setTimeout(() => {
-            if (!scannerAtivo) return;
-            cooldownCodigo = '';
-            loopPausado    = false;
-            cameraHint.textContent = '⬡ POSICIONE O PRÓXIMO CÓDIGO';
-            if (NATIVE_SUPPORTED) {
-                iniciarBarcodeDetectorNativo();
-            } else {
-                iniciarZXing();
-            }
-        }, 1500); // 1.5s de cooldown antes de aceitar novo código
+function finalizarLeitor(codigo, isDev) {
+  isDev ? bufferLeitorDev = '' : bufferLeitor = '';
+  const disp = isDev ? 'barcodeDisplayDev' : 'barcodeDisplay';
+  document.getElementById(disp).value = '';
+  document.getElementById(disp).placeholder = '// AGUARDANDO CÓDIGO //';
+  if (isDev) processarDev(codigo.trim()); else processar(codigo.trim());
+}
+
+// ════════════════════════════════════════════════════
+// PROCESSAR CÓDIGO ESCANEADO
+// ════════════════════════════════════════════════════
+async function processar(codigo) {
+  mostrarFeedback('⟳ Buscando pedido...', 'info');
+  try {
+    const res = await jsonpRequest({ action: 'buscarPorRastreio', rastreio: codigo });
+    if (res && res.encontrado) {
+      mostrarFeedback('', '');
+      mostrarModalPedido(res.pedido, codigo);
+    } else {
+      mostrarFeedback('', '');
+      document.getElementById('msgNaoEncontrado').textContent = res?.erro || 'Pedido não encontrado para este código.';
+      document.getElementById('codigoNaoEncontrado').textContent = codigo;
+      document.getElementById('modalNaoEncontrado').classList.add('show');
+      document.body.classList.add('modal-open');
+      retomarLoop(codigo, false);
     }
+  } catch(e) {
+    mostrarFeedback('❌ Erro de conexão ao buscar pedido', 'error');
+    retomarLoop(codigo, false);
+  }
+}
 
-    // ═══════════════════════════════════════════════════════
-    //  ENGINE 1 – BarcodeDetector (nativo do hardware)
-    //  Disponível: Android Chrome 83+, Samsung Internet,
-    //              macOS Ventura Safari 17+
-    // ═══════════════════════════════════════════════════════
-    function iniciarBarcodeDetectorNativo() {
-        // Formatos que o DANFE usa (Code128 é o principal)
-        const detector = new BarcodeDetector({
-            formats: ['code_128', 'itf', 'ean_13', 'ean_8', 'code_39', 'qr_code']
-        });
-
-        let ultimoCodigo = '';
-        let contagemVotos = 0;
-        const MIN_VOTOS = 2; // BarcodeDetector é muito mais preciso; 2 já basta
-
-        async function loop() {
-            if (!scannerAtivo || loopPausado) return;
-
-            if (video.readyState === video.HAVE_ENOUGH_DATA) {
-                try {
-                    const barcodes = await detector.detect(video);
-                    if (barcodes.length > 0) {
-                        // Pega o código mais longo (mais provável de ser o DANFE de 44 dig.)
-                        const melhor = barcodes.reduce((a, b) =>
-                            a.rawValue.length >= b.rawValue.length ? a : b
-                        );
-                        const raw   = melhor.rawValue;
-                        const limpo = raw.replace(/\D/g, '');
-
-                        // Ignora se ainda está no cooldown do código anterior
-                        if (limpo === cooldownCodigo) {
-                            rafId = requestAnimationFrame(loop); return;
-                        }
-
-                        if (limpo.length >= MIN_LEN) {
-                            if (limpo === ultimoCodigo) {
-                                contagemVotos++;
-                            } else {
-                                ultimoCodigo  = limpo;
-                                contagemVotos = 1;
-                            }
-
-                            cameraHint.textContent = `⬡ ${limpo.length} DÍGITOS · ${contagemVotos}/${MIN_VOTOS}`;
-
-                            if (contagemVotos >= MIN_VOTOS) {
-                                pausarLoop();
-                                mostrarModalConfirmacao(limpo, true);
-                                return;
-                            }
-                        } else {
-                            cameraHint.textContent = '⬡ CÓDIGO DETECTADO – APROXIME MAIS';
-                        }
-                    } else {
-                        cameraHint.textContent = '⬡ POSICIONE O CÓDIGO DENTRO DA ÁREA';
-                    }
-                } catch(e) {
-                    // detector.detect pode falhar em frames ruins — ignora e continua
-                }
-            }
-
-            rafId = requestAnimationFrame(loop);
-        }
-
-        rafId = requestAnimationFrame(loop);
+async function processarDev(codigo) {
+  mostrarFeedback('⟳ Buscando pedido...', 'info');
+  try {
+    const res = await jsonpRequest({ action: 'buscarPorRastreio', rastreio: codigo });
+    mostrarFeedback('', '');
+    if (res && res.encontrado) {
+      mostrarModalDevolucao(res.pedido, codigo);
+    } else {
+      // Devolução de pedido não cadastrado — permite registrar mesmo assim
+      mostrarModalDevolucao({ rastreio: codigo, nomeCliente: 'Não identificado', numeroPedido: '—', itens: '—', status: 'desconhecido' }, codigo);
     }
+  } catch(e) {
+    mostrarFeedback('❌ Erro de conexão', 'error');
+  }
+}
 
-    // ═══════════════════════════════════════════════════════
-    //  ENGINE 2 – ZXing-js (fallback JS puro)
-    //  Funciona em qualquer browser moderno
-    // ═══════════════════════════════════════════════════════
-    async function iniciarZXing() {
-        if (typeof ZXing === 'undefined') {
-            mostrarFeedback('❌ ZXing não carregou. Verifique a conexão.', '#c0392b');
-            pararScanner(); return;
-        }
+function retomarLoop(codigo, isDev) {
+  if (isDev) {
+    loopPausadoDev = true; cooldownDev = codigo;
+    clearTimeout(cooldownTimerDev);
+    cooldownTimerDev = setTimeout(() => { if (!scannerDevStream) return; cooldownDev = ''; loopPausadoDev = false; if (NATIVE) iniciarDetectorNativo('videoDev','cameraHintDev',processarDev); else iniciarZXing('videoDev','cameraHintDev',processarDev); }, 2000);
+  } else {
+    loopPausado = true; cooldown = codigo;
+    clearTimeout(cooldownTimer);
+    cooldownTimer = setTimeout(() => { if (!scannerStream) return; cooldown = ''; loopPausado = false; if (NATIVE) iniciarDetectorNativo('video','cameraHint',processar); else iniciarZXing('video','cameraHint',processar); }, 2000);
+  }
+}
 
-        const hints = new Map();
-        const formats = [
-            ZXing.BarcodeFormat.CODE_128,
-            ZXing.BarcodeFormat.ITF,
-            ZXing.BarcodeFormat.EAN_13,
-            ZXing.BarcodeFormat.EAN_8,
-            ZXing.BarcodeFormat.CODE_39
-        ];
-        hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, formats);
-        hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
+// ════════════════════════════════════════════════════
+// MODAL: PEDIDO ENCONTRADO
+// ════════════════════════════════════════════════════
+function mostrarModalPedido(pedido, codigoRaw) {
+  pedidoAtualConfirmacao = { ...pedido, codigoRaw };
+  const card = document.getElementById('pedidoCardModal');
 
-        const reader = new ZXing.MultiFormatReader();
-        reader.setHints(hints);
-        zxingReader = reader;
+  const isCancelado = (pedido.status || '').toLowerCase().match(/cancelad|estorno/);
+  const isDevolucao = pedido.eDevolucao;
+  const jaPrep = pedido.jaPreparado;
 
-        const canvas  = document.createElement('canvas');
-        const ctx     = canvas.getContext('2d', { willReadFrequently: true });
+  document.getElementById('alertaCancelado').style.display = isCancelado ? 'block' : 'none';
+  const alertaJa = document.getElementById('alertaJaPreparado');
+  if (jaPrep && jaPrep.sim) {
+    alertaJa.style.display = 'block';
+    alertaJa.innerHTML = `⚠ Já preparado por <strong>${jaPrep.colaborador}</strong> em ${formatarData(jaPrep.dataHora)}`;
+  } else {
+    alertaJa.style.display = 'none';
+  }
 
-        let ultimoCodigo  = '';
-        let contagemVotos = 0;
-        const MIN_VOTOS   = 3;
+  const statusClass = isCancelado ? 'status-cancelado' : isDevolucao ? 'status-devolucao' : 'status-normal';
+  const platClass = pedido.plataforma === 'mercadolivre' ? 'plat-mercadolivre' : 'plat-shopee';
+  const platLabel = pedido.plataforma === 'mercadolivre' ? 'ML' : 'SHOPEE';
 
-        function loop() {
-            if (!scannerAtivo || loopPausado) return;
+  const itensHtml = (pedido.itens || '—').split('|').map(i => i.trim()).filter(Boolean)
+    .map(i => `<div class="item-linha"><span class="item-bullet">▸</span><span>${i}</span></div>`).join('');
 
-            if (video.readyState === video.HAVE_ENOUGH_DATA) {
-                canvas.width  = video.videoWidth;
-                canvas.height = video.videoHeight;
-                ctx.drawImage(video, 0, 0);
+  card.innerHTML = `
+    <div class="pedido-header">
+      <div>
+        <span class="plat-badge plat-${pedido.plataforma||'shopee'}">${platLabel}</span>
+        <span style="font-size:11px;color:var(--text3);font-family:'Space Mono',monospace;margin-left:8px;">${escHtml(pedido.loja||'')}</span>
+      </div>
+      <span class="pedido-status-badge ${statusClass}">${escHtml(pedido.status||'—')}</span>
+    </div>
+    <div class="pedido-nf">NF: ${escHtml(pedido.numeroNF||'—')}</div>
+    <div class="pedido-pedido">#${escHtml(pedido.numeroPedido||'—')}</div>
+    <div class="pedido-cliente">👤 ${escHtml(pedido.nomeCliente||'—')}</div>
+    <div class="pedido-divider"></div>
+    <div class="pedido-itens-title">📦 ITENS DO PEDIDO</div>
+    <div class="pedido-itens">${itensHtml || escHtml(pedido.itens||'—')}</div>
+    <div class="pedido-valor">Valor: ${escHtml(String(pedido.valorTotal||'—'))}</div>`;
 
-                try {
-                    const imgData    = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                    const luminance  = new ZXing.RGBLuminanceSource(imgData.data, canvas.width, canvas.height);
-                    const binary     = new ZXing.HybridBinarizer(luminance);
-                    const bitmap     = new ZXing.BinaryBitmap(binary);
-                    const result     = reader.decode(bitmap);
-                    const raw        = result.getText();
-                    const limpo      = raw.replace(/\D/g, '');
+  document.getElementById('checkFotoKit').checked = false;
+  document.getElementById('modalPedido').classList.add('show');
+  document.body.classList.add('modal-open');
+  document.getElementById('btnConfirmarKit').focus();
+}
 
-                    // Ignora se ainda está no cooldown do código anterior
-                    if (limpo === cooldownCodigo) { rafId = requestAnimationFrame(loop); return; }
+function fecharModalPedido() {
+  document.getElementById('modalPedido').classList.remove('show');
+  document.body.classList.remove('modal-open');
+  const cod = pedidoAtualConfirmacao?.codigoRaw || '';
+  pedidoAtualConfirmacao = null;
+  if (modoAtivo === 'scanner' && scannerStream) retomarLoop(cod, false);
+  if (modoAtivo === 'leitor') { bufferLeitor = ''; document.getElementById('barcodeDisplay').value = ''; setTimeout(() => document.getElementById('barcodeInput').focus(), 100); }
+}
 
-                    if (limpo.length >= MIN_LEN) {
-                        if (limpo === ultimoCodigo) {
-                            contagemVotos++;
-                        } else {
-                            ultimoCodigo  = limpo;
-                            contagemVotos = 1;
-                        }
+async function confirmarKit() {
+  if (!pedidoAtualConfirmacao) return;
+  const pedido = pedidoAtualConfirmacao;
+  const colaborador = document.getElementById('inputColaborador').value.trim();
+  const loja = document.getElementById('inputLoja').value.trim();
+  const temFoto = document.getElementById('checkFotoKit').checked;
 
-                        cameraHint.textContent = `⬡ ${limpo.length} DÍGITOS · ${contagemVotos}/${MIN_VOTOS}`;
+  fecharModalPedido();
 
-                        if (contagemVotos >= MIN_VOTOS) {
-                            pausarLoop();
-                            mostrarModalConfirmacao(limpo, true);
-                            return;
-                        }
-                    }
-                } catch(e) {
-                    // NotFoundException é normal quando não há código no frame
-                    cameraHint.textContent = '⬡ POSICIONE O CÓDIGO DENTRO DA ÁREA';
-                }
-            }
+  const kit = {
+    id: Date.now().toString(),
+    rastreio: pedido.rastreio || pedido.codigoRaw,
+    numeroPedido: pedido.numeroPedido,
+    numeroNF: pedido.numeroNF,
+    nomeCliente: pedido.nomeCliente,
+    itens: pedido.itens,
+    valorTotal: pedido.valorTotal,
+    loja: loja || pedido.loja,
+    plataforma: pedido.plataforma,
+    colaborador,
+    temFoto,
+    dataHora: new Date().toISOString()
+  };
 
-            rafId = requestAnimationFrame(loop);
-        }
+  // Salva localmente primeiro
+  kitsHoje.unshift(kit);
+  atualizarListaKits();
+  salvarKitsLocais();
+  mostrarFeedback('✓ Kit registrado! Sincronizando...', 'success');
 
-        rafId = requestAnimationFrame(loop);
+  try {
+    await jsonpRequest({ action: 'salvarKit', data: JSON.stringify(kit) });
+    mostrarFeedback(`✓ Kit #${pedido.numeroPedido} salvo!`, 'success');
+  } catch(e) {
+    mostrarFeedback('⚠ Salvo localmente — sem conexão', 'warn');
+  }
+}
+
+// ════════════════════════════════════════════════════
+// MODAL: DEVOLUÇÃO
+// ════════════════════════════════════════════════════
+function mostrarModalDevolucao(pedido, codigoRaw) {
+  pedidoDevConfirmacao = { ...pedido, codigoRaw };
+  const card = document.getElementById('devPedidoCard');
+
+  const itensHtml = (pedido.itens || '—').split('|').map(i => i.trim()).filter(Boolean)
+    .map(i => `<div class="item-linha"><span class="item-bullet" style="color:var(--yellow);">▸</span><span>${i}</span></div>`).join('');
+
+  card.innerHTML = `
+    <div class="pedido-nf">Rastreio: ${escHtml(pedido.rastreio || codigoRaw || '—')}</div>
+    <div class="pedido-pedido">#${escHtml(pedido.numeroPedido||'—')}</div>
+    <div class="pedido-cliente">👤 ${escHtml(pedido.nomeCliente||'—')}</div>
+    ${pedido.motivoDevolucao ? `<div style="background:var(--yellow-bg);border:1px solid rgba(255,216,77,0.2);border-radius:6px;padding:8px 12px;font-size:12px;color:var(--yellow);margin:8px 0;">Motivo registrado: ${escHtml(pedido.motivoDevolucao)}</div>` : ''}
+    <div class="pedido-divider"></div>
+    <div class="pedido-itens-title">📦 ITENS ESPERADOS NA CAIXA</div>
+    <div class="pedido-itens">${itensHtml || escHtml(pedido.itens||'—')}</div>`;
+
+  document.getElementById('devObservacoes').value = '';
+  document.getElementById('modalDevolucao').classList.add('show');
+  document.body.classList.add('modal-open');
+  document.getElementById('devObservacoes').focus();
+}
+
+function fecharModalDevolucao() {
+  document.getElementById('modalDevolucao').classList.remove('show');
+  document.body.classList.remove('modal-open');
+  pedidoDevConfirmacao = null;
+  if (modoAtivo === 'scannerDev' && scannerDevStream) retomarLoop('', true);
+  if (modoAtivo === 'leitorDev') { bufferLeitorDev = ''; document.getElementById('barcodeDisplayDev').value = ''; setTimeout(() => document.getElementById('barcodeInputDev').focus(), 100); }
+}
+
+async function confirmarDevolucao() {
+  if (!pedidoDevConfirmacao) return;
+  const pedido = pedidoDevConfirmacao;
+  const colaborador = document.getElementById('inputColaboradorDev').value.trim();
+  const loja = document.getElementById('inputLojaDev').value.trim();
+  const obs = document.getElementById('devObservacoes').value.trim();
+
+  fecharModalDevolucao();
+
+  const dev = {
+    id: Date.now().toString(),
+    rastreio: pedido.rastreio || pedido.codigoRaw,
+    numeroPedido: pedido.numeroPedido,
+    numeroNF: pedido.numeroNF,
+    nomeCliente: pedido.nomeCliente,
+    itens: pedido.itens,
+    valorTotal: pedido.valorTotal,
+    loja: loja || pedido.loja,
+    plataforma: pedido.plataforma,
+    colaborador,
+    motivoDevolucao: pedido.motivoDevolucao || '',
+    observacoes: obs,
+    dataHora: new Date().toISOString()
+  };
+
+  devsHoje.unshift(dev);
+  atualizarListaDevs();
+  mostrarFeedback('✓ Devolução registrada! Sincronizando...', 'warn');
+
+  try {
+    await jsonpRequest({ action: 'salvarDevolucao', data: JSON.stringify(dev) });
+    mostrarFeedback(`↩ Devolução registrada com sucesso!`, 'success');
+  } catch(e) {
+    mostrarFeedback('⚠ Salvo localmente — sem conexão', 'warn');
+  }
+}
+
+// ════════════════════════════════════════════════════
+// MODAL: NÃO ENCONTRADO
+// ════════════════════════════════════════════════════
+function fecharModalNaoEncontrado() {
+  document.getElementById('modalNaoEncontrado').classList.remove('show');
+  document.body.classList.remove('modal-open');
+}
+
+// ════════════════════════════════════════════════════
+// LISTAS
+// ════════════════════════════════════════════════════
+function atualizarListaKits() {
+  const lista = document.getElementById('listaKits');
+  const cont = document.getElementById('contadorKits');
+  const btns = document.getElementById('actionButtons');
+  const hoje = kitsHoje.filter(isHoje);
+
+  cont.textContent = hoje.length;
+  btns.style.display = hoje.length ? 'flex' : 'none';
+
+  if (!hoje.length) {
+    lista.innerHTML = '<p class="empty-state">// nenhum kit preparado hoje</p>';
+    return;
+  }
+
+  lista.innerHTML = hoje.map(k => `
+    <div class="kit-card">
+      <div class="kit-top">
+        <span class="kit-collab">${escHtml(k.colaborador)}</span>
+        <span class="kit-numero">#${escHtml(k.numeroPedido||k.rastreio||'—')}</span>
+      </div>
+      <div class="kit-cliente">👤 ${escHtml(k.nomeCliente||'—')} ${k.temFoto ? '<span class="kit-foto-badge">📷</span>' : ''}</div>
+      <div class="kit-data">${formatarData(k.dataHora)} · ${escHtml(k.loja||'')}</div>
+    </div>`).join('');
+}
+
+function atualizarListaDevs() {
+  const lista = document.getElementById('listaDevs');
+  const cont = document.getElementById('contadorDevs');
+  const hoje = devsHoje.filter(isHoje);
+
+  cont.textContent = hoje.length;
+
+  if (!hoje.length) {
+    lista.innerHTML = '<p class="empty-state">// nenhuma devolução hoje</p>';
+    return;
+  }
+
+  lista.innerHTML = hoje.map(d => `
+    <div class="kit-card devolucao">
+      <div class="kit-top">
+        <span class="kit-collab">${escHtml(d.colaborador)}</span>
+        <span class="kit-numero" style="color:var(--yellow);">#${escHtml(d.numeroPedido||d.rastreio||'—')}</span>
+      </div>
+      <div class="kit-cliente">👤 ${escHtml(d.nomeCliente||'—')}</div>
+      ${d.observacoes ? `<div style="font-size:11px;color:var(--text3);margin-top:2px;">📝 ${escHtml(d.observacoes)}</div>` : ''}
+      <div class="kit-data">${formatarData(d.dataHora)} · ${escHtml(d.loja||'')}</div>
+    </div>`).join('');
+}
+
+function isHoje(item) {
+  const d = new Date(item.dataHora || 0);
+  const agora = new Date();
+  return d.getFullYear() === agora.getFullYear() && d.getMonth() === agora.getMonth() && d.getDate() === agora.getDate();
+}
+
+function salvarKitsLocais() {
+  localStorage.setItem('ps_kits', JSON.stringify(kitsHoje.slice(0, 200)));
+}
+
+function carregarKitsLocais() {
+  const d = localStorage.getItem('ps_kits');
+  if (d) try { kitsHoje = JSON.parse(d); atualizarListaKits(); } catch(_) {}
+  const d2 = localStorage.getItem('ps_devs');
+  if (d2) try { devsHoje = JSON.parse(d2); atualizarListaDevs(); } catch(_) {}
+}
+
+// ════════════════════════════════════════════════════
+// IMPORTAR CSV
+// ════════════════════════════════════════════════════
+function handleCSVDrop(e) {
+  e.preventDefault();
+  document.getElementById('csvDropZone').style.borderColor = 'var(--border2)';
+  const file = e.dataTransfer.files[0];
+  if (file) processarCSVFile(file);
+}
+
+function handleCSVFile(e) {
+  const file = e.target.files[0];
+  if (file) processarCSVFile(file);
+}
+
+async function processarCSVFile(file) {
+  const loja = document.getElementById('importLoja').value;
+  const plat = document.getElementById('importPlataforma').value;
+  const status = document.getElementById('importStatus');
+  status.style.display = 'block';
+  status.style.color = 'var(--text2)';
+  status.textContent = `⟳ Lendo arquivo: ${file.name}...`;
+
+  try {
+    const text = await file.text();
+    status.textContent = `⟳ Enviando para o servidor (${text.length} bytes)...`;
+
+    const res = await jsonpRequest({
+      action: 'importarCSV',
+      dados: text,
+      plataforma: plat,
+      loja: loja
+    }, 30000);
+
+    if (res && res.ok) {
+      status.style.color = 'var(--neon)';
+      status.textContent = `✓ Importado com sucesso!\n📦 ${res.importados} pedidos novos | ⚠ ${res.duplicatas} duplicatas ignoradas | Total no arquivo: ${res.total}`;
+    } else {
+      status.style.color = 'var(--red)';
+      status.textContent = `✗ Erro: ${res?.erro || 'Falha desconhecida'}`;
     }
+  } catch(e) {
+    status.style.color = 'var(--red)';
+    status.textContent = `✗ Erro: ${e.message}`;
+  }
+}
 
-    // ═══════════════════════════════════════════════════════
-    //  LEITOR FÍSICO (pistola / USB)
-    // ═══════════════════════════════════════════════════════
-    function capturarTeclaLeitor(e) {
-        const agora = Date.now();
-        if (agora - ultimoKeyTime > 500 && bufferLeitor.length > 0) bufferLeitor = '';
-        ultimoKeyTime = agora;
+// ════════════════════════════════════════════════════
+// VALIDAÇÕES
+// ════════════════════════════════════════════════════
+function validarCampos() {
+  const col = document.getElementById('inputColaborador').value.trim();
+  const loja = document.getElementById('inputLoja').value.trim();
+  if (!col || !loja) {
+    mostrarFeedback('❌ Selecione a loja e verifique o colaborador', 'error'); return false;
+  }
+  return true;
+}
 
-        if (e.key.length !== 1 && e.key !== 'Enter') return;
+function validarCamposDev() {
+  const col = document.getElementById('inputColaboradorDev').value.trim();
+  const loja = document.getElementById('inputLojaDev').value.trim();
+  if (!col || !loja) {
+    mostrarFeedback('❌ Selecione a loja e verifique o colaborador', 'error'); return false;
+  }
+  return true;
+}
 
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            if (bufferLeitor.length >= MIN_LEN) finalizarLeituraLeitor(bufferLeitor);
-            return;
-        }
+// ════════════════════════════════════════════════════
+// UTILS
+// ════════════════════════════════════════════════════
+function escHtml(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 
-        if (/\d/.test(e.key)) {
-            bufferLeitor += e.key;
-            atualizarDisplayLeitor(bufferLeitor);
-        }
+function formatarData(d) {
+  if (!d) return '—';
+  try {
+    return new Date(d).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo', day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+  } catch { return String(d); }
+}
 
-        clearTimeout(timerLeitor);
-        timerLeitor = setTimeout(() => {
-            if (bufferLeitor.length >= MIN_LEN) {
-                finalizarLeituraLeitor(bufferLeitor);
-            } else if (bufferLeitor.length > 0) {
-                barcodeDisplay.value       = '';
-                barcodeDisplay.placeholder = `⚠ INCOMPLETO: ${bufferLeitor.length} dígitos`;
-                setTimeout(() => {
-                    bufferLeitor               = '';
-                    barcodeDisplay.placeholder = '// AGUARDANDO CÓDIGO //';
-                }, 2000);
-            }
-        }, PAUSA_LEITOR);
-    }
+function mostrarFeedback(msg, tipo) {
+  const fb = document.getElementById('feedback');
+  if (!msg) { fb.style.display = 'none'; return; }
+  const cores = { success: { bg: 'rgba(168,255,62,0.15)', txt: 'var(--neon)', border: 'rgba(168,255,62,0.3)' }, error: { bg: 'var(--red-bg)', txt: 'var(--red)', border: 'rgba(255,77,77,0.3)' }, info: { bg: 'var(--blue-bg)', txt: 'var(--blue)', border: 'rgba(77,170,255,0.3)' }, warn: { bg: 'var(--yellow-bg)', txt: 'var(--yellow)', border: 'rgba(255,216,77,0.3)' } };
+  const c = cores[tipo] || { bg: 'var(--surface2)', txt: 'var(--text)', border: 'var(--border)' };
+  fb.textContent = msg;
+  fb.style.background = c.bg; fb.style.color = c.txt;
+  fb.style.border = `1px solid ${c.border}`;
+  fb.style.display = 'block';
+  if (tipo !== 'info') setTimeout(() => { fb.style.display = 'none'; }, 4000);
+}
 
-    function atualizarDisplayLeitor(codigo) {
-        barcodeDisplay.value       = codigo.length > 0 ? codigo : '';
-        barcodeDisplay.placeholder = codigo.length > 0 ? '' : '// AGUARDANDO CÓDIGO //';
-    }
-
-    function finalizarLeituraLeitor(codigo) {
-        const limpo = codigo.replace(/\D/g, '');
-        bufferLeitor               = '';
-        barcodeDisplay.value       = '';
-        barcodeDisplay.placeholder = '// AGUARDANDO CÓDIGO //';
-        if (limpo.length < MIN_LEN) return;
-        if (limpo.length !== 44) console.warn(`[LEITOR] ${limpo.length} dígitos:`, limpo);
-        mostrarModalConfirmacao(limpo, false);
-    }
-
-    // Fallback input event
-    barcodeInput.addEventListener('input', function(e) {
-        if (!modoLeitor) return;
-        // 🔧 CORREÇÃO: ignora se o modal ainda está aberto (evita reler código anterior)
-        if (modalConfirmacao.classList.contains('show')) {
-            e.target.value = '';
-            return;
-        }
-        const val = e.target.value.replace(/\D/g, '');
-        if (val.length > bufferLeitor.length) {
-            bufferLeitor = val;
-            atualizarDisplayLeitor(bufferLeitor);
-            clearTimeout(timerLeitor);
-            timerLeitor = setTimeout(() => {
-                if (bufferLeitor.length >= MIN_LEN) finalizarLeituraLeitor(bufferLeitor);
-            }, PAUSA_LEITOR);
-        }
-    });
-
-    function iniciarLeitorCodigo() {
-        const nomeColaborador = inputNomeColaborador.value.trim();
-        const nomeLoja        = inputNomeLoja.value.trim();
-        if (!nomeColaborador || !nomeLoja) {
-            mostrarFeedback('❌ Preencha colaborador e loja primeiro', '#c0392b'); return;
-        }
-        modoLeitor   = true;
-        bufferLeitor = '';
-        barcodeInputContainer.classList.add('show');
-        btnEscanear.style.display     = 'none';
-        btnLeitorCodigo.style.display = 'none';
-        barcodeInput.value = '';
-        barcodeInput.focus();
-    }
-
-    function pararLeitorCodigo() {
-        modoLeitor   = false;
-        bufferLeitor = '';
-        clearTimeout(timerLeitor);
-        barcodeInputContainer.classList.remove('show');
-        btnEscanear.style.display     = 'flex';
-        btnLeitorCodigo.style.display = 'flex';
-    }
-
-    // ═══════════════════════════════════════════════════════
-    //  MODAL + PROCESSAMENTO
-    // ═══════════════════════════════════════════════════════
-    function extrairNumeroNF(c) {
-        if (!c) return null;
-        const s = c.replace(/\D/g, '');
-        if (s.length >= 44) return s.substring(25, 34).replace(/^0+/, '') || s.substring(25, 34);
-        return s;
-    }
-
-    function mostrarModalConfirmacao(codigo, temFoto = false) {
-        const numeroNF        = extrairNumeroNF(codigo);
-        const nomeColaborador = inputNomeColaborador.value.trim();
-        const nomeLoja        = inputNomeLoja.value.trim();
-        codigoAtualConfirmacao = codigo;
-        temFotoAtual           = temFoto;
-        modalColaborador.textContent = nomeColaborador;
-        modalLoja.textContent        = nomeLoja;
-        modalNumeroNF.textContent    = numeroNF || 'Não identificado';
-        const cls = codigo.length === 44 ? 'digitos-ok' : 'digitos-alerta';
-        modalBarcode.innerHTML = `
-            <span class="${cls}">${codigo}</span><br>
-            <span class="len-badge">${codigo.length} dígitos ${codigo.length === 44 ? '✓' : '⚠ esperado 44'}</span>
-        `;
-        document.getElementById('checkFoto').checked = false;
-        modalConfirmacao.classList.add('show');
-        document.body.classList.add('modal-open');
-        btnConfirmar.focus();
-    }
-
-    function fecharModal() {
-        const codigoLido = codigoAtualConfirmacao;
-        modalConfirmacao.classList.remove('show');
-        document.body.classList.remove('modal-open');
-        codigoAtualConfirmacao = null;
-        temFotoAtual           = false;
-        if (modoLeitor) {
-            // 🔧 CORREÇÃO: limpa buffer e campos antes de restaurar foco
-            bufferLeitor               = '';
-            barcodeInput.value         = '';
-            barcodeDisplay.value       = '';
-            barcodeDisplay.placeholder = '// AGUARDANDO CÓDIGO //';
-            clearTimeout(timerLeitor);
-            // Pequeno delay para garantir que o modal fechou completamente
-            setTimeout(() => barcodeInput.focus(), 50);
-        } else if (scannerAtivo) {
-            // Câmera estava ativa: retoma com cooldown
-            retomarLoop(codigoLido || '');
-        }
-    }
-
-    function confirmarLeitura() {
-        if (!codigoAtualConfirmacao) return;
-        const comFoto = document.getElementById('checkFoto').checked;
-        processarCodigo(codigoAtualConfirmacao, comFoto);
-        fecharModal();
-    }
-
-    function processarCodigo(codigoBarras, temFoto = false) {
-        const numeroNF        = extrairNumeroNF(codigoBarras);
-        const nomeColaborador = inputNomeColaborador.value.trim();
-        const nomeLoja        = inputNomeLoja.value.trim();
-        if (!numeroNF || !nomeColaborador || !nomeLoja) {
-            mostrarFeedback('❌ Dados inválidos', '#c0392b'); return;
-        }
-        const jaExiste = notasFiscais.some(
-            n => n.numeroNF === numeroNF && n.loja === nomeLoja && n.colaborador === nomeColaborador
-        );
-        if (jaExiste) { mostrarFeedback('⚠️ Esta nota já foi escaneada!', '#d4a017'); return; }
-        const novaEntrada = {
-            id: Date.now(), colaborador: nomeColaborador, loja: nomeLoja,
-            numeroNF, codigoCompleto: codigoBarras, temFoto,
-            dataHora: new Date().toLocaleString('pt-BR', {
-                day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'
-            })
-        };
-        notasFiscais.unshift(novaEntrada);
-        atualizarLista();
-        mostrarFeedback(`✓ NF ${numeroNF} salva${temFoto ? ' com foto' : ''}!`, '#3a5c1f');
-        salvarNoLocalStorage();
-        salvarNoBackend(novaEntrada);
-        pdfExportado       = false;
-        btnLimpar.disabled = true;
-    }
-
-    // ─── EDITAR LOJA ───────────────────────────────────────
-    let editandoId = null;
-
-    function abrirEditarLoja(id) {
-        const nota = notasFiscais.find(n => String(n.id) === String(id));
-        if (!nota) return;
-        editandoId = nota.id;
-        document.getElementById('editModalNF').textContent          = nota.numeroNF;
-        document.getElementById('editModalColaborador').textContent = nota.colaborador;
-        document.getElementById('editInputLoja').value             = nota.loja;
-        document.getElementById('modalEditarLoja').classList.add('show');
-        document.body.classList.add('modal-open');
-        document.getElementById('editInputLoja').focus();
-    }
-
-    function fecharEditarLoja() {
-        document.getElementById('modalEditarLoja').classList.remove('show');
-        document.body.classList.remove('modal-open');
-        editandoId = null;
-    }
-
-    function salvarEdicaoLoja() {
-        const novaLoja = document.getElementById('editInputLoja').value.trim();
-        if (!novaLoja) { mostrarFeedback('❌ Nome da loja não pode ser vazio', '#c0392b'); return; }
-        const idx = notasFiscais.findIndex(n => n.id === editandoId);
-        if (idx === -1) return;
-        notasFiscais[idx].loja = novaLoja;
-        atualizarLista();
-        salvarNoLocalStorage();
-        fecharEditarLoja();
-        mostrarFeedback('✓ Loja atualizada!', '#3a5c1f');
-    }
-
-    document.getElementById('btnEditCancelar').addEventListener('click', fecharEditarLoja);
-    document.getElementById('btnEditSalvar').addEventListener('click', salvarEdicaoLoja);
-    document.getElementById('editInputLoja').addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') { e.preventDefault(); salvarEdicaoLoja(); }
-    });
-
-    async function salvarNoBackend(nota) {
-        try {
-            const r = await fetch('http://localhost:3000/api/salvar-nota', {
-                method:'POST', headers:{'Content-Type':'application/json'},
-                body: JSON.stringify(nota)
-            });
-            if (!r.ok) console.error('Erro backend');
-        } catch(e) { console.error('Backend:', e); }
-    }
-
-    function atualizarLista() {
-        if (!notasFiscais.length) {
-            listaNotas.innerHTML        = '<p class="empty-state">// nenhuma nota escaneada ainda</p>';
-            actionButtons.style.display = 'none';
-            contador.textContent        = '0'; return;
-        }
-        actionButtons.style.display = 'flex';
-        contador.textContent        = notasFiscais.length;
-        listaNotas.innerHTML = notasFiscais.map(nota => `
-            <div class="nota-card">
-                <div class="nota-card-top">
-                    <div class="nota-colaborador">${nota.colaborador}</div>
-                    ${nota.temFoto ? '<span class="camera-badge" title="Acompanha foto">📷</span>' : ''}
-                </div>
-                <div class="nota-loja-row">
-                    <span class="nota-loja">${nota.loja}</span>
-                    <button class="btn-edit-loja" onclick="abrirEditarLoja('${nota.id}')" title="Editar loja">✏️</button>
-                </div>
-                <div class="nota-numero">${nota.numeroNF}</div>
-                <div class="nota-data">${nota.dataHora}</div>
-            </div>
-        `).join('');
-    }
-
-    function mostrarFeedback(msg, cor) {
-        feedback.textContent       = msg;
-        feedback.style.background  = cor;
-        feedback.style.display     = 'block';
-        setTimeout(() => { feedback.style.display = 'none'; }, 3000);
-    }
-
-    function salvarNoLocalStorage() { localStorage.setItem('notasFiscais', JSON.stringify(notasFiscais)); }
-
-    function carregarDoLocalStorage() {
-        const d = localStorage.getItem('notasFiscais');
-        if (d) { try { notasFiscais = JSON.parse(d); atualizarLista(); } catch(e) {} }
-    }
-
-    async function exportarJSON() {
-        if (!notasFiscais.length) { mostrarFeedback('❌ Nenhuma nota para exportar', '#c0392b'); return; }
-        try {
-            const blob = new Blob([JSON.stringify(notasFiscais, null, 2)], {type:'application/json'});
-            const url  = URL.createObjectURL(blob);
-            const a    = Object.assign(document.createElement('a'), { href: url, download: `dados_dashboard_${new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')}.json` });
-            a.click(); URL.revokeObjectURL(url);
-            await fetch('http://localhost:3000/api/exportar-json', {
-                method:'POST', headers:{'Content-Type':'application/json'},
-                body: JSON.stringify({ notas: notasFiscais })
-            });
-            mostrarFeedback('✓ Dados exportados para Dashboard!', '#3a5c1f');
-        } catch(e) { mostrarFeedback('❌ Erro ao exportar', '#c0392b'); }
-    }
-
-    function exportarPDF() {
-        if (!notasFiscais.length) { mostrarFeedback('❌ Nenhuma nota para exportar', '#c0392b'); return; }
-        try {
-            const doc = new jsPDF();
-            const pw = doc.internal.pageSize.getWidth(), ph = doc.internal.pageSize.getHeight();
-            const porLoja = {};
-            notasFiscais.forEach(n => { if (!porLoja[n.loja]) porLoja[n.loja]=[]; porLoja[n.loja].push(n); });
-            let primeiro = true;
-            Object.keys(porLoja).sort().forEach(loja => {
-                if (!primeiro) doc.addPage(); primeiro = false;
-                const notas = porLoja[loja]; let y = 20;
-                doc.setFontSize(20); doc.setTextColor(74,92,47);
-                doc.text('Relatório de Notas Fiscais', pw/2, y, {align:'center'}); y+=15;
-                doc.setFontSize(16); doc.setTextColor(31,41,55);
-                doc.text(`Loja: ${loja}`, 20, y); y+=10;
-                doc.setFontSize(12); doc.setTextColor(75,85,99);
-                doc.text(`Total de Notas: ${notas.length}`, 20, y); y+=15;
-                doc.setDrawColor(74,92,47); doc.line(20,y,pw-20,y); y+=10;
-                doc.setFontSize(10); doc.setTextColor(107,114,128);
-                notas.forEach((nota,i) => {
-                    if (y>ph-40) { doc.addPage(); y=20; }
-                    doc.text(`${i+1}. NF: ${nota.numeroNF}${nota.temFoto?' [foto]':''}`, 20, y); y+=5;
-                    doc.setFontSize(9); doc.setTextColor(155,160,168);
-                    doc.text(`Colaborador: ${nota.colaborador}`, 25, y); y+=4;
-                    doc.text(`Data: ${nota.dataHora}`, 25, y); y+=8;
-                    doc.setFontSize(10); doc.setTextColor(107,114,128);
-                });
-            });
-            doc.save(`relatorio_notas_${new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')}.pdf`);
-            pdfExportado       = true;
-            btnLimpar.disabled = false;
-            mostrarFeedback('✓ PDF exportado com sucesso!', '#3a5c1f');
-        } catch(e) { mostrarFeedback('❌ Erro ao exportar PDF', '#c0392b'); }
-    }
-
-    function limparNotas() {
-        if (!notasFiscais.length) { mostrarFeedback('❌ Nenhuma nota para limpar', '#c0392b'); return; }
-        if (confirm('⚠️ Tem certeza que deseja limpar todas as notas fiscais?')) {
-            notasFiscais = []; atualizarLista(); salvarNoLocalStorage();
-            mostrarFeedback('✓ Todas as notas foram removidas', '#3a5c1f');
-            btnLimpar.disabled = true; pdfExportado = false;
-        }
-    }
-    </script>
+// ════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════
+(function() {
+  ['loginEmail','loginSenha'].forEach(id => {
+    document.getElementById(id)?.addEventListener('keydown', e => { if (e.key === 'Enter') fazerLogin(); });
+  });
+  const sess = sessionStorage.getItem(SESSION_KEY);
+  if (sess) { try { mostrarApp(JSON.parse(sess)); } catch(_) {} }
+})();
+</script>
 </body>
 </html>
+

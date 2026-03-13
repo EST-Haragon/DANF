@@ -444,6 +444,8 @@ button{font-family:'Space Grotesk',sans-serif;cursor:pointer;border:none;border-
 </div>
 
 <script src="https://unpkg.com/@zxing/library@latest/umd/index.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 <script>
 // ════════════════════════════════════════════════════
 // CONFIG
@@ -1266,6 +1268,79 @@ function mostrarFeedback(msg, tipo) {
 }
 
 // ════════════════════════════════════════════════════
+// EXPORTAR PDF
+// ════════════════════════════════════════════════════
+function exportarRelatorio(tipo) {
+  if (typeof window.jspdf === 'undefined') {
+    mostrarFeedback('❌ jsPDF não carregou. Verifique sua conexão.', 'error');
+    return;
+  }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const agora = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+  const hoje = kitsHoje.filter(isHoje);
+  const hojeDevs = devsHoje.filter(isHoje);
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(16);
+  doc.setTextColor(40);
+  doc.text('QGK PackScan — Relatório Diário', 14, 18);
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(120);
+  doc.text(`Gerado em: ${agora}`, 14, 25);
+
+  if (tipo === 'kits' || tipo === 'todos') {
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(40);
+    doc.text(`Kits Preparados: ${hoje.length}`, 14, 34);
+    doc.autoTable({
+      startY: 38,
+      head: [['#Pedido', 'Cliente', 'Loja', 'Colaborador', 'Foto', 'Horário']],
+      body: hoje.map(k => [
+        k.numeroPedido || k.rastreio || '—',
+        k.nomeCliente || '—',
+        k.loja || '—',
+        k.colaborador || '—',
+        k.temFoto ? 'Sim' : 'Não',
+        formatarData(k.dataHora)
+      ]),
+      theme: 'striped',
+      headStyles: { fillColor: [30, 40, 20], textColor: [168, 255, 62] },
+      styles: { fontSize: 8 }
+    });
+  }
+
+  if (tipo === 'devs' || tipo === 'todos') {
+    const startY = (doc.lastAutoTable?.finalY || 38) + 10;
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(40);
+    doc.text(`Devoluções: ${hojeDevs.length}`, 14, startY);
+    doc.autoTable({
+      startY: startY + 4,
+      head: [['#Pedido', 'Cliente', 'Loja', 'Colaborador', 'Observações', 'Horário']],
+      body: hojeDevs.map(d => [
+        d.numeroPedido || d.rastreio || '—',
+        d.nomeCliente || '—',
+        d.loja || '—',
+        d.colaborador || '—',
+        d.observacoes || '—',
+        formatarData(d.dataHora)
+      ]),
+      theme: 'striped',
+      headStyles: { fillColor: [40, 30, 10], textColor: [255, 216, 77] },
+      styles: { fontSize: 8 }
+    });
+  }
+
+  const data = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
+  doc.save(`qgk-packscan-${tipo}-${data}.pdf`);
+  mostrarFeedback('✓ PDF gerado com sucesso!', 'success');
+}
+
+// ════════════════════════════════════════════════════
 // INIT
 // ════════════════════════════════════════════════════
 (function() {
@@ -1278,4 +1353,3 @@ function mostrarFeedback(msg, tipo) {
 </script>
 </body>
 </html>
-
